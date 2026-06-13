@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>坂道 RADIO — On Air</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0b0e;
+  --surface: #14151a;
+  --surface-2: #1a1c22;
+  --surface-3: #20232b;
+  --border: #2a2c33;
+  --border-bright: #3d4049;
+  --text: #e8e9ec;
+  --text-2: #a4a6ad;
+  --text-3: #6a6c74;
+  --accent: #b292d1;
+  --accent-deep: #8b66b5;
+  --accent-faint: rgba(178,146,209,0.08);
+  --signal: #6ee7a8;
+  --signal-faint: rgba(110,231,168,0.10);
+  --fm: #5a5b62;
+  /* group colors */
+  --nogi: #b292d1;       /* violet */
+  --saku: #e88aae;       /* sakura pink */
+  --hina: #f0c674;       /* hinata sun-yellow */
+  /* desaturated variants used for FM / no-SDR shows */
+  --nogi-mute: color-mix(in srgb, var(--nogi), var(--text-3) 52%);
+  --saku-mute: color-mix(in srgb, var(--saku), var(--text-3) 52%);
+  --hina-mute: color-mix(in srgb, var(--hina), var(--text-3) 48%);
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', sans-serif;
+  --jp: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 400;
+  padding: 16px 20px 32px;
+  min-height: 100vh;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at top, rgba(178,146,209,0.05), transparent 60%),
+    repeating-linear-gradient(0deg,
+      rgba(255,255,255,0.012) 0, rgba(255,255,255,0.012) 1px,
+      transparent 1px, transparent 3px);
+  z-index: 0;
+}
+.container { max-width: 1600px; margin: 0 auto; position: relative; z-index: 1; }
+
+/* ============ HEADER ============ */
+header {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.brand { display: flex; flex-direction: column; gap: 6px; }
+.brand-line { color: var(--text-3); font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; }
+.title { font-size: 26px; letter-spacing: 0.04em; font-weight: 500; margin: 0; }
+.title .jp { font-family: var(--jp); color: var(--accent); margin-right: 12px; font-weight: 700; font-size: 28px; }
+.subtitle { color: var(--text-2); font-size: 11px; letter-spacing: 0.12em; }
+.clock { text-align: right; line-height: 1.3; border-left: 1px solid var(--border); padding-left: 18px; }
+.clock-time { font-size: 20px; font-weight: 500; color: var(--accent); letter-spacing: 0.05em; font-variant-numeric: tabular-nums; }
+.clock-label { font-size: 10px; color: var(--text-3); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 2px; }
+
+/* ============ CONTROLS ============ */
+.controls {
+  display: grid;
+  grid-template-columns: minmax(170px, auto) minmax(160px, auto) minmax(170px, auto) 1fr;
+  gap: 18px;
+  align-items: end;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.ctrl { display: flex; flex-direction: column; gap: 6px; }
+.ctrl label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-3); }
+select, input[type=text] {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 9px 11px;
+  font-family: var(--sans);
+  font-size: 12px;
+  border-radius: 0;
+  outline: none;
+  transition: border-color 150ms;
+}
+select:focus, input[type=text]:focus { border-color: var(--accent); }
+input[type=text] { width: 100%; }
+.filter-toggle { display: flex; border: 1px solid var(--border); }
+.filter-toggle button {
+  background: var(--bg);
+  border: none;
+  color: var(--text-2);
+  padding: 9px 12px;
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 150ms;
+  flex: 1;
+}
+.filter-toggle button:not(:last-child) { border-right: 1px solid var(--border); }
+.filter-toggle button:hover { color: var(--text); }
+.filter-toggle button.active { background: var(--accent); color: var(--bg); font-weight: 500; }
+
+/* ============ SECTIONS ============ */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 500;
+  margin: 0 0 14px;
+}
+.section-title .rule { flex: 1; height: 1px; background: var(--border); }
+.section-title .count { color: var(--text-3); font-weight: 400; letter-spacing: 0.1em; }
+
+/* ============ LAYOUT: controls + up-next (left) | calendar + infocard (right) */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 600px);
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 28px;
+}
+.col-main { min-width: 0; }
+.col-side {
+  min-width: 0;
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.hero-label.on-air { color: var(--signal); }
+.hero-card { margin-bottom: 26px; }
+#heroCard { display: flex; flex-direction: column; gap: 14px; }
+/* Spotlight card: emphasise the countdown to airing */
+#heroCard .card-rel { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: 0; margin-bottom: 2px; }
+#heroCard .card.live .card-rel { color: var(--signal); }
+#heroCard .card-time { font-size: 12px; }
+
+.empty-msg {
+  padding: 18px;
+  background: var(--surface);
+  border: 1px dashed var(--border-bright);
+  color: var(--text-3);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+.empty-msg strong { color: var(--text-2); font-weight: 500; }
+
+/* ============ UP NEXT (chronological list) ============ */
+.up-next { margin-bottom: 28px; }
+.day-group { margin-bottom: 22px; }
+.day-group:last-child { margin-bottom: 0; }
+.day-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.day-head .d-rel { font-size: 13px; color: var(--accent); font-weight: 500; letter-spacing: 0.06em; }
+.day-head .d-date { font-size: 10px; color: var(--text-3); letter-spacing: 0.15em; text-transform: uppercase; }
+
+/* Responsive up to a hard cap of 3 columns: each track is at least one third
+   of the row, so a 4th column never fits even on very wide screens. */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, max(330px, (100% - 24px) / 3)), 1fr)); gap: 12px; }
+
+.card {
+  position: relative;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  padding: 13px 15px 14px;
+  transition: border-color 160ms, transform 160ms, box-shadow 160ms;
+}
+.card:hover { border-color: var(--border-bright); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.4); }
+.card.group-nogi { border-left-color: var(--nogi); }
+.card.group-saku { border-left-color: var(--saku); }
+.card.group-hina { border-left-color: var(--hina); }
+.card.live {
+  border-color: rgba(110,231,168,0.4);
+  border-left-color: var(--signal);
+  background: var(--signal-faint);
+}
+
+/* header row: title (left) ↔ frequency + station (right) */
+.card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+.card-headline { min-width: 0; }
+.card-jp { display: inline-block; font-family: var(--jp); color: var(--accent); font-weight: 700; font-size: 18.5px; line-height: 1.2; text-decoration: none; }
+a.card-jp:hover { text-decoration: underline; text-underline-offset: 3px; }
+.card.group-nogi .card-jp { color: var(--nogi); }
+.card.group-saku .card-jp { color: var(--saku); }
+.card.group-hina .card-jp { color: var(--hina); }
+.card-en { color: var(--text-2); font-size: 11.5px; font-style: italic; margin-top: 4px; }
+.lnk {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border-bright);
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  transition: color 130ms, border-color 130ms, background 130ms;
+}
+.lnk:hover { color: var(--text); border-color: var(--accent-deep); background: var(--surface-3); z-index: 20; }
+.lnk svg { display: block; }
+
+.card-freqbox {
+  flex-shrink: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.card-freq {
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.card.group-nogi .card-freq { color: var(--nogi); }
+.card.group-saku .card-freq { color: var(--saku); }
+.card.group-hina .card-freq { color: var(--hina); }
+/* FM / no-SDR cards: desaturate the group accent (border, title, frequency) */
+.card.fm.group-nogi { border-left-color: var(--nogi-mute); }
+.card.fm.group-saku { border-left-color: var(--saku-mute); }
+.card.fm.group-hina { border-left-color: var(--hina-mute); }
+.card.fm.group-nogi .card-jp, .card.fm.group-nogi .card-freq { color: var(--nogi-mute); }
+.card.fm.group-saku .card-jp, .card.fm.group-saku .card-freq { color: var(--saku-mute); }
+.card.fm.group-hina .card-jp, .card.fm.group-hina .card-freq { color: var(--hina-mute); }
+.card-station { margin-top: 4px; line-height: 1.3; white-space: nowrap; }
+.card-station .st-call { display: block; font-size: 11px; font-weight: 600; color: var(--text-2); letter-spacing: 0.04em; }
+.card-station .st-name { display: block; font-size: 10px; color: var(--text-3); letter-spacing: 0.02em; }
+
+/* host sits immediately beneath the show name */
+.card-host { font-size: 16px; font-weight: 500; color: var(--text); line-height: 1.35; margin-top: 8px; }
+
+/* schedule stacked under the station, top-right */
+.card-sched { margin-top: 8px; }
+.card-rel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-2);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.card.live .card-rel { color: var(--signal); font-weight: 600; }
+.card-time { color: var(--text); font-size: 11px; margin-top: 3px; white-space: nowrap; }
+.card-time .alt { color: var(--text-3); font-size: 9px; display: block; margin-top: 1px; letter-spacing: 0.03em; }
+
+/* bottom action row: website / twitter buttons, a divider, then SDR tune
+   buttons -- all flat siblings so they share one baseline/center. */
+.card-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+.foot-sep { align-self: stretch; width: 1px; min-height: 20px; margin: 0 5px; background: var(--border); }
+
+.sdr-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 11px;
+  border: 1px solid var(--border-bright);
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition: border-color 130ms, background 130ms, color 130ms;
+}
+.card.group-nogi .sdr-btn { color: var(--nogi); }
+.card.group-saku .sdr-btn { color: var(--saku); }
+.card.group-hina .sdr-btn { color: var(--hina); }
+.sdr-btn:hover { border-color: var(--accent-deep); background: var(--surface-3); color: var(--text); z-index: 20; }
+.sdr-na { font-size: 11px; color: var(--text-3); font-style: italic; align-self: center; }
+
+/* custom hover infobox (SDR buttons, link buttons) */
+.tip {
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  z-index: 60;
+  width: max-content;
+  max-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 11px;
+  text-align: left;
+  white-space: normal;
+  font-style: normal;
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-radius: 8px;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.6);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 130ms ease, transform 130ms ease;
+}
+.sdr-btn:hover .tip, .lnk:hover .tip { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+.tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--border-bright);
+}
+.tip-title { color: var(--accent); font-weight: 600; font-size: 11.5px; letter-spacing: 0.04em; }
+.tip-sub { color: var(--text-2); font-size: 10px; line-height: 1.35; }
+.tip-meta { color: var(--text-3); font-size: 9.5px; font-variant-numeric: tabular-nums; letter-spacing: 0.03em; }
+
+/* ============ WEEK TIMETABLE ============ */
+.tt-section { margin-bottom: 24px; }
+.tt-scroll {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.tt-grid { display: grid; position: relative; }
+
+.tt-corner, .tt-dayhead {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-bright);
+}
+.tt-corner { border-right: 1px solid var(--border-bright); }
+.tt-dayhead {
+  padding: 9px 6px;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  border-right: 1px solid var(--border);
+}
+.tt-dayhead:last-child { border-right: none; }
+.tt-dayhead.today { color: var(--accent); background: var(--accent-faint); }
+
+.tt-gutter { position: relative; border-right: 1px solid var(--border-bright); background: var(--surface); }
+.tt-hour {
+  position: absolute;
+  right: 6px;
+  transform: translateY(-50%);
+  font-size: 9px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.tt-col { position: relative; border-right: 1px solid var(--border); }
+.tt-col:last-child { border-right: none; }
+.tt-col.today { background: var(--accent-faint); }
+.tt-line { position: absolute; left: 0; right: 0; border-top: 1px solid var(--border); }
+.tt-now { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--signal); z-index: 4; }
+.tt-now::before {
+  content: ''; position: absolute; left: -3px; top: -3px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--signal); box-shadow: 0 0 7px var(--signal);
+}
+
+/* solid colour blocks; click opens the show in the left infocard */
+.tt-block {
+  position: absolute;
+  border-radius: 3px;
+  cursor: pointer;
+  user-select: none;
+  transition: filter 120ms, box-shadow 120ms;
+}
+.tt-block:hover { z-index: 5; filter: brightness(1.15); box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+.tt-block.sel { z-index: 5; box-shadow: 0 0 0 2px var(--text); filter: brightness(1.08); }
+.tt-block.g-nogi { background: var(--nogi); }
+.tt-block.g-saku { background: var(--saku); }
+.tt-block.g-hina { background: var(--hina); }
+/* FM / no-SDR: same hue, less saturated */
+.tt-block.fm.g-nogi { background: var(--nogi-mute); }
+.tt-block.fm.g-saku { background: var(--saku-mute); }
+.tt-block.fm.g-hina { background: var(--hina-mute); }
+
+/* ============ FOOTER / LEGEND ============ */
+.legend {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 12px 0;
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-swatch { width: 14px; height: 14px; border-left: 3px solid; background: var(--surface-3); }
+
+footer {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  color: var(--text-3);
+  font-size: 11px;
+  line-height: 1.7;
+}
+footer .footnote { margin: 6px 0; }
+footer strong { color: var(--text-2); }
+footer a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+footer code { background: var(--surface-2); padding: 1px 4px; color: var(--accent); font-size: 10px; }
+.build-stamp { margin-top: 10px; color: var(--text-3); opacity: 0.7; font-size: 10px; }
+
+@media (max-width: 980px) {
+  .layout { grid-template-columns: 1fr; }
+  .col-side { position: static; }
+}
+@media (max-width: 720px) {
+  body { padding: 16px 10px 40px; }
+  .controls { grid-template-columns: 1fr; }
+  .cards { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="brand">
+      <h1 class="title"><span class="jp">坂道</span>RADIO</h1>
+      <div class="subtitle">on air now &amp; what's coming up</div>
+    </div>
+    <div class="clock">
+      <div class="clock-time" id="jstClock">···</div>
+      <div class="clock-label">JST</div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="col-main">
+      <h2 class="section-title">Controls<span class="rule"></span></h2>
+      <div class="controls">
+        <div class="ctrl">
+          <label for="tzSelect">Display timezone</label>
+          <select id="tzSelect">
+            <option value="Asia/Tokyo" selected>JST</option>
+            <option value="UTC">UTC</option>
+            <option value="LOCAL">Local</option>
+          </select>
+        </div>
+        <div class="ctrl">
+          <label>Band filter</label>
+          <div class="filter-toggle" id="bandFilter">
+            <button data-filter="ALL" class="active">All</button>
+            <button data-filter="AM">AM</button>
+            <button data-filter="FM">FM</button>
+          </div>
+        </div>
+        <div class="ctrl">
+          <label>Group filter</label>
+          <div class="filter-toggle" id="groupFilter">
+            <button data-group="ALL" class="active">All</button>
+            <button data-group="nogi">Nogi</button>
+            <button data-group="saku">Saku</button>
+            <button data-group="hina">Hina</button>
+          </div>
+        </div>
+      </div>
+
+      <section class="hero-card">
+        <h2 class="section-title hero-label" id="heroLabel"><span id="heroLabelText">Spotlight</span><span class="rule"></span></h2>
+        <div id="heroCard"></div>
+      </section>
+    </div>
+
+    <aside class="col-side">
+      <section class="cal">
+        <h2 class="section-title">Week timetable <span class="count" id="ttTz"></span><span class="rule"></span></h2>
+        <div class="tt-scroll">
+          <div class="tt-grid" id="timetable"></div>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <section class="up-next">
+    <h2 class="section-title">Schedule <span class="count" id="upNextCount"></span><span class="rule"></span></h2>
+    <div id="upNext"></div>
+  </section>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="border-color: var(--nogi)"></div>Nogizaka46</div>
+    <div class="legend-item"><div class="legend-swatch" style="border-color: var(--saku)"></div>Sakurazaka46</div>
+    <div class="legend-item"><div class="legend-swatch" style="border-color: var(--hina)"></div>Hinatazaka46</div>
+    <div class="legend-item"><div class="legend-swatch" style="border-color: var(--signal); background: var(--signal-faint)"></div>Live now</div>
+    <div class="legend-item">Title links to the show's official page</div>
+  </div>
+
+  <footer>
+    <div class="footnote"><strong>Listen via SDR.</strong> Each AM station shows its 5 nearest public <a href="http://rx.linkfanel.net/" target="_blank" rel="noopener">KiwiSDR</a> receivers (by distance from the transmitter), each opening that KiwiSDR pre-tuned to the frequency in AM mode (<code>/?f={freq}am</code>). The receiver list is pulled fresh each time the page is rebuilt. FM stations have no SDR option — KiwiSDRs only cover ~0–30 MHz and cannot receive Japanese FM (76–95 MHz).</div>
+    <div class="footnote"><strong>Before you tune in.</strong> KiwiSDR slots are limited and most receivers enforce a per-user time limit, so you may be disconnected or find a receiver full. Most KiwiSDRs also publicly display the IP address of connected listeners — using a VPN is highly recommended.</div>
+    <div class="footnote"><strong>Source.</strong> Schedule compiled from <a href="https://46fansina.com/radio-shows" target="_blank" rel="noopener">46FansINA</a>.</div>
+    <div class="build-stamp" id="buildStamp"></div>
+  </footer>
+</div>
+
+<script>
+window.__SHOWS__ = [
+  {
+    "group": "nogi",
+    "titleJp": "フニャフニャ伝説",
+    "titleEn": "Funya Funya Densetsu",
+    "dayJst": 2,
+    "startJst": "21:00",
+    "endJst": "23:00",
+    "hosts": "Atago Kokone",
+    "stations": [
+      {
+        "name": "FM FUJI",
+        "call": "FM-FUJI",
+        "role": "key",
+        "freqKhz": 83000,
+        "band": "FM"
+      }
+    ],
+    "official": null,
+    "twitter": "https://x.com/fmfujiaoiro1gou"
+  },
+  {
+    "group": "nogi",
+    "titleJp": "乃木坂46 長嶋凛桜・矢田萌華のレコメン！",
+    "titleEn": "Nagashima Rio · Yada Moeka no Recomen!",
+    "dayJst": 1,
+    "startJst": "22:00",
+    "endJst": "25:00",
+    "hosts": "Nagashima Rio · Yada Moeka",
+    "stations": [
+      {
+        "name": "Bunka Hōsō",
+        "call": "JOQR",
+        "role": "key",
+        "freqKhz": 1134,
+        "band": "AM",
+        "lat": 35.807,
+        "lon": 139.683,
+        "place": "Toda, Saitama",
+        "kiwis": [
+          {
+            "name": "0-30 MHZ SDR#1, JH1PGF, TOKYO, JAPAN. Up to eight users can listen simultaneously.",
+            "loc": "Adachi, Tokyo, Japan",
+            "locJp": "足立",
+            "tuneUrl": "http://kiwisdr.hirokinet.com:8074/?f=1134am",
+            "distKm": 12
+          },
+          {
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "loc": "Edogawa-ku, Tokyo, Japan",
+            "locJp": "江戸川区",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1134am",
+            "distKm": 19
+          },
+          {
+            "name": "0-30 MHz SDR | Tokyo, Japan",
+            "loc": "Tokyo, Japan",
+            "locJp": "東京",
+            "tuneUrl": "http://gnss.proxy.kiwisdr.com/?f=1134am",
+            "distKm": 20
+          },
+          {
+            "name": "0-30 MHz SDR, JP1ODJ, Saitama JAPAN",
+            "loc": "Okegawa Saitama JAPAN",
+            "locJp": "桶川",
+            "tuneUrl": "http://jp1odj.proxy.kiwisdr.com/?f=1134am",
+            "distKm": 26
+          },
+          {
+            "name": "0-30 MHz SDR,NDXA, JJ1LIB, Yokohama",
+            "loc": "Yokohama,Japan",
+            "locJp": "横浜",
+            "tuneUrl": "http://59.129.216.68:8073/?f=1134am",
+            "distKm": 40
+          }
+        ]
+      }
+    ],
+    "official": "https://www.joqr.co.jp/qr/program/reco/",
+    "twitter": "https://x.com/reco_oshirase"
+  },
+  {
+    "group": "nogi",
+    "titleJp": "乃木坂46岡本姫奈のおかひな時間",
+    "titleEn": "Okamoto Hina no Okahina Jikan",
+    "dayJst": 6,
+    "startJst": "11:30",
+    "endJst": "12:00",
+    "hosts": "Okamoto Hina",
+    "stations": [
+      {
+        "name": "Tōkai Radio",
+        "call": "SF",
+        "role": "key",
+        "freqKhz": 1332,
+        "band": "AM",
+        "kiwi": "http://21083.proxy2.kiwisdr.com:8073",
+        "lat": 35.134,
+        "lon": 136.782,
+        "place": "Kanie, Aichi",
+        "kiwis": [
+          {
+            "name": "0-30 MHz SDR | Kita-Nagoya, Aichi, Japan",
+            "loc": "Kita-Nagoya, Aichi, Japan",
+            "locJp": "北名古屋",
+            "tuneUrl": "http://21805.proxy.kiwisdr.com/?f=1332am",
+            "distKm": 14
+          },
+          {
+            "name": "0-30 MHz SDR | Kyoto, Japan",
+            "loc": "Kyoto, Japan",
+            "locJp": "京都",
+            "tuneUrl": "http://218.228.218.85:8073/?f=1332am",
+            "distKm": 94
+          },
+          {
+            "name": "0-30 KiwiSDR2 | Hamamatsu, Japan",
+            "loc": "Hamamatsu, Japan",
+            "locJp": "浜松",
+            "tuneUrl": "http://21083.proxy.kiwisdr.com/?f=1332am",
+            "distKm": 95
+          },
+          {
+            "name": "0-30 MHz SDR, Rio, Osaka, Japan",
+            "loc": "Osaka, Japan",
+            "locJp": "大阪",
+            "tuneUrl": "http://os.f5.si:8073/?f=1332am",
+            "distKm": 113
+          },
+          {
+            "name": "0-30 MHz SDR Radio Station at Minowa, Kamiinagun, Nagano, JAPAN",
+            "loc": "Nagano, Japan",
+            "locJp": "長野",
+            "tuneUrl": "http://ja0veu.proxy.kiwisdr.com/?f=1332am",
+            "distKm": 139
+          }
+        ]
+      }
+    ],
+    "official": "https://www.tokairadio.co.jp/program/okahina/",
+    "twitter": "https://x.com/okahinajikan"
+  },
+  {
+    "group": "nogi",
+    "titleJp": "乃木坂46小川彩のbaby baby maybe",
+    "titleEn": "Ogawa Aya no baby baby maybe",
+    "dayJst": 4,
+    "startJst": "00:00",
+    "endJst": "00:30",
+    "hosts": "Ogawa Aya",
+    "stations": [
+      {
+        "name": "bayfm78",
+        "call": "bayfm",
+        "role": "key",
+        "freqKhz": 78000,
+        "band": "FM"
+      }
+    ],
+    "official": "https://program.bayfm.co.jp/aya/",
+    "twitter": "https://x.com/aya78MHz"
+  },
+  {
+    "group": "nogi",
+    "titleJp": "乃木坂46柴田柚菜のDreaming Time",
+    "titleEn": "Shibata Yuna no Dreaming Time",
+    "dayJst": 2,
+    "startJst": "23:00",
+    "endJst": "23:30",
+    "hosts": "Shibata Yuna",
+    "stations": [
+      {
+        "name": "bayfm78",
+        "call": "bayfm",
+        "role": "key",
+        "freqKhz": 78000,
+        "band": "FM"
+      }
+    ],
+    "official": "https://program.bayfm.co.jp/yuna/",
+    "twitter": "https://x.com/yuna78MHz"
+  },
+  {
+    "group": "nogi",
+    "titleJp": "アーティストLOCKS!（乃木坂LOCKS!）",
+    "titleEn": "Artist LOCKS! (Nogizaka LOCKS!)",
+    "dayJst": 4,
+    "startJst": "23:08",
+    "endJst": "23:28",
+    "hosts": "Kaki Haruka",
+    "stations": [
+      {
+        "name": "Tokyo FM",
+        "call": "JFN",
+        "role": "key",
+        "freqKhz": 80000,
+        "band": "FM"
+      }
+    ],
+    "official": "https://www.tfm.co.jp/lock/nogizaka46/",
+    "twitter": "https://x.com/sol_info"
+  },
+  {
+    "group": "nogi",
+    "titleJp": "ベルク presents 乃木坂46の乃木坂に相談だ!",
+    "titleEn": "Belc presents Nogizaka ni Soudanda!",
+    "dayJst": 5,
+    "startJst": "20:30",
+    "endJst": "20:55",
+    "hosts": "Tamura Mayu · Ichinose Miku",
+    "stations": [
+      {
+        "name": "Tokyo FM",
+        "call": "JFN",
+        "role": "key",
+        "freqKhz": 80000,
+        "band": "FM"
+      }
+    ],
+    "official": "https://www.tfm.co.jp/nogizakasoudan/",
+    "twitter": "https://x.com/soudan_tfm"
+  },
+  {
+    "group": "nogi",
+    "titleJp": "乃木坂46のオールナイトニッポン",
+    "titleEn": "Nogizaka46 no All Night Nippon",
+    "dayJst": 4,
+    "startJst": "01:00",
+    "endJst": "03:00",
+    "hosts": "Inoue Nagi",
+    "stations": [
+      {
+        "name": "Nippon Hōsō",
+        "call": "JOLF",
+        "role": "key",
+        "freqKhz": 1242,
+        "band": "AM",
+        "lat": 35.396,
+        "lon": 139.925,
+        "place": "Kisarazu, Chiba",
+        "kiwis": [
+          {
+            "name": "0-30 MHz SDR | Chiba, Japan",
+            "loc": "Chiba, Japan",
+            "locJp": "千葉",
+            "tuneUrl": "http://22299.proxy.kiwisdr.com/?f=1242am",
+            "distKm": 14
+          },
+          {
+            "name": "1-30 MHz SDR | Yokohama,Japan.",
+            "loc": "Yokohama,Japan.",
+            "locJp": "横浜",
+            "tuneUrl": "http://21750.proxy.kiwisdr.com/?f=1242am",
+            "distKm": 26
+          },
+          {
+            "name": "0-30 MHz SDR,NDXA, JJ1LIB, Yokohama",
+            "loc": "Yokohama,Japan",
+            "locJp": "横浜",
+            "tuneUrl": "http://59.129.216.68:8073/?f=1242am",
+            "distKm": 27
+          },
+          {
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "loc": "Edogawa-ku, Tokyo, Japan",
+            "locJp": "江戸川区",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1242am",
+            "distKm": 38
+          },
+          {
+            "name": "0-30 MHZ SDR#1, JH1PGF, TOKYO, JAPAN. Up to eight users can listen simultaneously.",
+            "loc": "Adachi, Tokyo, Japan",
+            "locJp": "足立",
+            "tuneUrl": "http://kiwisdr.hirokinet.com:8074/?f=1242am",
+            "distKm": 43
+          }
+        ]
+      }
+    ],
+    "official": "https://www.allnightnippon.com/nogizaka46/",
+    "twitter": "https://x.com/NOGI46ann"
+  },
+  {
+    "group": "nogi",
+    "titleJp": "らじらー！サンデー",
+    "titleEn": "Rajira! Sunday",
+    "dayJst": 0,
+    "startJst": "20:05",
+    "endJst": "22:55",
+    "hosts": "Ioki Mao · Kawasaki Sakura",
+    "stations": [
+      {
+        "name": "NHK Radio 1 Tokyo",
+        "call": "JOAK",
+        "role": "key",
+        "freqKhz": 594,
+        "band": "AM",
+        "lat": 36.118,
+        "lon": 139.667,
+        "place": "Kuki, Saitama",
+        "kiwis": [
+          {
+            "name": "0-30 MHz SDR, JP1ODJ, Saitama JAPAN",
+            "loc": "Okegawa Saitama JAPAN",
+            "locJp": "桶川",
+            "tuneUrl": "http://jp1odj.proxy.kiwisdr.com/?f=594am",
+            "distKm": 16
+          },
+          {
+            "name": "0-30 MHZ SDR#1, JH1PGF, TOKYO, JAPAN. Up to eight users can listen simultaneously.",
+            "loc": "Adachi, Tokyo, Japan",
+            "locJp": "足立",
+            "tuneUrl": "http://kiwisdr.hirokinet.com:8074/?f=594am",
+            "distKm": 40
+          },
+          {
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "loc": "Edogawa-ku, Tokyo, Japan",
+            "locJp": "江戸川区",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=594am",
+            "distKm": 47
+          },
+          {
+            "name": "0-30 MHz SDR | Tokyo, Japan",
+            "loc": "Tokyo, Japan",
+            "locJp": "東京",
+            "tuneUrl": "http://gnss.proxy.kiwisdr.com/?f=594am",
+            "distKm": 48
+          },
+          {
+            "name": "JA5FP LF | Chiba, Japan",
+            "loc": "Chiba, Japan",
+            "locJp": "千葉",
+            "tuneUrl": "http://ja5fp1.proxy.kiwisdr.com/?f=594am",
+            "distKm": 68
+          }
+        ]
+      }
+    ],
+    "official": "https://www.nhk.jp/p/radirer/rs/88W859PYQ9/",
+    "twitter": "https://x.com/nhk_radirer"
+  },
+  {
+    "group": "nogi",
+    "titleJp": "乃木坂46の「の」",
+    "titleEn": "Nogizaka no \"No\"",
+    "dayJst": 0,
+    "startJst": "18:00",
+    "endJst": "18:30",
+    "hosts": "Sugawara Satsuki",
+    "stations": [
+      {
+        "name": "Bunka Hōsō",
+        "call": "JOQR",
+        "role": "key",
+        "freqKhz": 1134,
+        "band": "AM",
+        "lat": 35.807,
+        "lon": 139.683,
+        "place": "Toda, Saitama",
+        "kiwis": [
+          {
+            "name": "0-30 MHZ SDR#1, JH1PGF, TOKYO, JAPAN. Up to eight users can listen simultaneously.",
+            "loc": "Adachi, Tokyo, Japan",
+            "locJp": "足立",
+            "tuneUrl": "http://kiwisdr.hirokinet.com:8074/?f=1134am",
+            "distKm": 12
+          },
+          {
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "loc": "Edogawa-ku, Tokyo, Japan",
+            "locJp": "江戸川区",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1134am",
+            "distKm": 19
+          },
+          {
+            "name": "0-30 MHz SDR | Tokyo, Japan",
+            "loc": "Tokyo, Japan",
+            "locJp": "東京",
+            "tuneUrl": "http://gnss.proxy.kiwisdr.com/?f=1134am",
+            "distKm": 20
+          },
+          {
+            "name": "0-30 MHz SDR, JP1ODJ, Saitama JAPAN",
+            "loc": "Okegawa Saitama JAPAN",
+            "locJp": "桶川",
+            "tuneUrl": "http://jp1odj.proxy.kiwisdr.com/?f=1134am",
+            "distKm": 26
+          },
+          {
+            "name": "0-30 MHz SDR,NDXA, JJ1LIB, Yokohama",
+            "loc": "Yokohama,Japan",
+            "locJp": "横浜",
+            "tuneUrl": "http://59.129.216.68:8073/?f=1134am",
+            "distKm": 40
+          }
+        ]
+      }
+    ],
+    "official": "https://www.joqr.co.jp/qr/program/nogizaka/",
+    "twitter": "https://x.com/nogi_joqr"
+  },
+  {
+    "group": "nogi",
+    "titleJp": "沈黙の金曜日",
+    "titleEn": "Chinmoku no Kinyoubi",
+    "dayJst": 5,
+    "startJst": "21:00",
+    "endJst": "23:00",
+    "hosts": "Yumiki Nao",
+    "stations": [
+      {
+        "name": "FM FUJI",
+        "call": "FM-FUJI",
+        "role": "key",
+        "freqKhz": 83000,
+        "band": "FM"
+      }
+    ],
+    "official": null,
+    "twitter": "https://x.com/fmfujichinmoku"
+  },
+  {
+    "group": "nogi",
+    "titleJp": "DJ KOO presents BEAT GOES ON",
+    "titleEn": "DJ KOO presents BEAT GOES ON",
+    "dayJst": 5,
+    "startJst": "20:00",
+    "endJst": "20:56",
+    "hosts": "Suzuki Yuuna",
+    "stations": [
+      {
+        "name": "FM FUJI",
+        "call": "FM-FUJI",
+        "role": "key",
+        "freqKhz": 83000,
+        "band": "FM"
+      }
+    ],
+    "official": null,
+    "twitter": "https://x.com/BGO_fmfuji"
+  },
+  {
+    "group": "nogi",
+    "titleJp": "花ラジちば",
+    "titleEn": "Hana Radio Chiba",
+    "dayJst": 5,
+    "startJst": "11:00",
+    "endJst": "12:00",
+    "hosts": "Shibata Yuna",
+    "stations": [
+      {
+        "name": "NHK-FM Chiba",
+        "call": "JOMP",
+        "role": "key",
+        "freqKhz": 80700,
+        "band": "FM"
+      }
+    ],
+    "official": "https://www.nhk.jp/p/hanaradi/rs/ZPN5WR61G3/",
+    "twitter": null
+  },
+  {
+    "group": "saku",
+    "titleJp": "櫻坂46の「さ」",
+    "titleEn": "Sakurazaka no \"Sa\"",
+    "dayJst": 0,
+    "startJst": "19:00",
+    "endJst": "19:30",
+    "hosts": "Mukai Itoha",
+    "stations": [
+      {
+        "name": "Bunka Hōsō",
+        "call": "JOQR",
+        "role": "key",
+        "freqKhz": 1134,
+        "band": "AM",
+        "lat": 35.807,
+        "lon": 139.683,
+        "place": "Toda, Saitama",
+        "kiwis": [
+          {
+            "name": "0-30 MHZ SDR#1, JH1PGF, TOKYO, JAPAN. Up to eight users can listen simultaneously.",
+            "loc": "Adachi, Tokyo, Japan",
+            "locJp": "足立",
+            "tuneUrl": "http://kiwisdr.hirokinet.com:8074/?f=1134am",
+            "distKm": 12
+          },
+          {
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "loc": "Edogawa-ku, Tokyo, Japan",
+            "locJp": "江戸川区",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1134am",
+            "distKm": 19
+          },
+          {
+            "name": "0-30 MHz SDR | Tokyo, Japan",
+            "loc": "Tokyo, Japan",
+            "locJp": "東京",
+            "tuneUrl": "http://gnss.proxy.kiwisdr.com/?f=1134am",
+            "distKm": 20
+          },
+          {
+            "name": "0-30 MHz SDR, JP1ODJ, Saitama JAPAN",
+            "loc": "Okegawa Saitama JAPAN",
+            "locJp": "桶川",
+            "tuneUrl": "http://jp1odj.proxy.kiwisdr.com/?f=1134am",
+            "distKm": 26
+          },
+          {
+            "name": "0-30 MHz SDR,NDXA, JJ1LIB, Yokohama",
+            "loc": "Yokohama,Japan",
+            "locJp": "横浜",
+            "tuneUrl": "http://59.129.216.68:8073/?f=1134am",
+            "distKm": 40
+          }
+        ]
+      }
+    ],
+    "official": "https://www.joqr.co.jp/qr/program/sakura/",
+    "twitter": "https://x.com/sakura_joqr"
+  },
+  {
+    "group": "saku",
+    "titleJp": "櫻坂46こちら有楽町星空放送局",
+    "titleEn": "Kochira Yurakuchō Hoshizora Hōsōkyoku",
+    "dayJst": 0,
+    "startJst": "23:00",
+    "endJst": "23:30",
+    "hosts": "Kojima Nagisa",
+    "stations": [
+      {
+        "name": "Nippon Hōsō",
+        "call": "JOLF",
+        "role": "key",
+        "freqKhz": 1242,
+        "band": "AM",
+        "lat": 35.396,
+        "lon": 139.925,
+        "place": "Kisarazu, Chiba",
+        "kiwis": [
+          {
+            "name": "0-30 MHz SDR | Chiba, Japan",
+            "loc": "Chiba, Japan",
+            "locJp": "千葉",
+            "tuneUrl": "http://22299.proxy.kiwisdr.com/?f=1242am",
+            "distKm": 14
+          },
+          {
+            "name": "1-30 MHz SDR | Yokohama,Japan.",
+            "loc": "Yokohama,Japan.",
+            "locJp": "横浜",
+            "tuneUrl": "http://21750.proxy.kiwisdr.com/?f=1242am",
+            "distKm": 26
+          },
+          {
+            "name": "0-30 MHz SDR,NDXA, JJ1LIB, Yokohama",
+            "loc": "Yokohama,Japan",
+            "locJp": "横浜",
+            "tuneUrl": "http://59.129.216.68:8073/?f=1242am",
+            "distKm": 27
+          },
+          {
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "loc": "Edogawa-ku, Tokyo, Japan",
+            "locJp": "江戸川区",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1242am",
+            "distKm": 38
+          },
+          {
+            "name": "0-30 MHZ SDR#1, JH1PGF, TOKYO, JAPAN. Up to eight users can listen simultaneously.",
+            "loc": "Adachi, Tokyo, Japan",
+            "locJp": "足立",
+            "tuneUrl": "http://kiwisdr.hirokinet.com:8074/?f=1242am",
+            "distKm": 43
+          }
+        ]
+      }
+    ],
+    "official": "https://www.allnightnippon.com/sakura/",
+    "twitter": "https://x.com/kochihoshi"
+  },
+  {
+    "group": "saku",
+    "titleJp": "ゴチャ・まぜっ天国！",
+    "titleEn": "Gocha-Maze Tengoku!",
+    "dayJst": 5,
+    "startJst": "01:00",
+    "endJst": "01:30",
+    "hosts": "Takemoto Yui",
+    "stations": [
+      {
+        "name": "MBS Radio",
+        "call": "MBS",
+        "role": "key",
+        "freqKhz": 1179,
+        "band": "AM",
+        "lat": 34.522,
+        "lon": 135.43,
+        "place": "Takaishi, Osaka",
+        "kiwis": [
+          {
+            "name": "0-30 MHz SDR | JQ3JPN Minoh, Osaka, Japan",
+            "loc": "Osaka, Japan",
+            "locJp": "大阪",
+            "tuneUrl": "http://nr601sdrnet.ddns.net:4400/?f=1179am",
+            "distKm": 38
+          },
+          {
+            "name": "0-30 MHz SDR | Kyoto, Japan",
+            "loc": "Kyoto, Japan",
+            "locJp": "京都",
+            "tuneUrl": "http://218.228.218.85:8073/?f=1179am",
+            "distKm": 57
+          },
+          {
+            "name": "0-30 MHz SDR AT JA4YUF | OKAYAMA,JAPAN",
+            "loc": "OKAYAMA,JAPAN",
+            "locJp": "岡山",
+            "tuneUrl": "http://22052.proxy.kiwisdr.com/?f=1179am",
+            "distKm": 142
+          },
+          {
+            "name": "0-30 MHz SDR | Kita-Nagoya, Aichi, Japan",
+            "loc": "Kita-Nagoya, Aichi, Japan",
+            "locJp": "北名古屋",
+            "tuneUrl": "http://21805.proxy.kiwisdr.com/?f=1179am",
+            "distKm": 153
+          },
+          {
+            "name": "0-30MHZ SDR,JH4SBD | Fukuyama, Japan",
+            "loc": "Fukuyama, Japan",
+            "locJp": "福山",
+            "tuneUrl": "http://sdrfukuyama.ddns.net:8073/?f=1179am",
+            "distKm": 191
+          }
+        ]
+      }
+    ],
+    "official": "https://www.mbs1179.com/gochaten/",
+    "twitter": null
+  },
+  {
+    "group": "hina",
+    "titleJp": "日向坂46・正源司陽子のオールナイトニッポンX(クロス)",
+    "titleEn": "Shogenji Yoko no All Night Nippon X (Cross)",
+    "dayJst": 5,
+    "startJst": "00:00",
+    "endJst": "00:58",
+    "hosts": "Shogenji Yoko",
+    "stations": [
+      {
+        "name": "Nippon Hōsō",
+        "call": "JOLF",
+        "role": "key",
+        "freqKhz": 1242,
+        "band": "AM",
+        "lat": 35.396,
+        "lon": 139.925,
+        "place": "Kisarazu, Chiba",
+        "kiwis": [
+          {
+            "name": "0-30 MHz SDR | Chiba, Japan",
+            "loc": "Chiba, Japan",
+            "locJp": "千葉",
+            "tuneUrl": "http://22299.proxy.kiwisdr.com/?f=1242am",
+            "distKm": 14
+          },
+          {
+            "name": "1-30 MHz SDR | Yokohama,Japan.",
+            "loc": "Yokohama,Japan.",
+            "locJp": "横浜",
+            "tuneUrl": "http://21750.proxy.kiwisdr.com/?f=1242am",
+            "distKm": 26
+          },
+          {
+            "name": "0-30 MHz SDR,NDXA, JJ1LIB, Yokohama",
+            "loc": "Yokohama,Japan",
+            "locJp": "横浜",
+            "tuneUrl": "http://59.129.216.68:8073/?f=1242am",
+            "distKm": 27
+          },
+          {
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "loc": "Edogawa-ku, Tokyo, Japan",
+            "locJp": "江戸川区",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1242am",
+            "distKm": 38
+          },
+          {
+            "name": "0-30 MHZ SDR#1, JH1PGF, TOKYO, JAPAN. Up to eight users can listen simultaneously.",
+            "loc": "Adachi, Tokyo, Japan",
+            "locJp": "足立",
+            "tuneUrl": "http://kiwisdr.hirokinet.com:8074/?f=1242am",
+            "distKm": 43
+          }
+        ]
+      }
+    ],
+    "official": "https://www.allnightnippon.com/yoko/",
+    "twitter": "https://x.com/yoko_annX"
+  },
+  {
+    "group": "hina",
+    "titleJp": "清水理央のCheer up!",
+    "titleEn": "Shimizu Rio no Cheer up!",
+    "dayJst": 2,
+    "startJst": "00:00",
+    "endJst": "00:30",
+    "hosts": "Shimizu Rio",
+    "stations": [
+      {
+        "name": "bayfm78",
+        "call": "bayfm",
+        "role": "key",
+        "freqKhz": 78000,
+        "band": "FM"
+      }
+    ],
+    "official": null,
+    "twitter": "https://x.com/rio78MHz"
+  },
+  {
+    "group": "hina",
+    "titleJp": "LOGISTEED RADIONOMICS",
+    "titleEn": "LOGISTEED RADIONOMICS",
+    "dayJst": 5,
+    "startJst": "22:30",
+    "endJst": "23:00",
+    "hosts": "Tsurusaki Niko",
+    "stations": [
+      {
+        "name": "J-WAVE",
+        "call": "JOAV",
+        "role": "key",
+        "freqKhz": 81300,
+        "band": "FM"
+      }
+    ],
+    "official": "https://www.j-wave.co.jp/original/radionomics/",
+    "twitter": "https://x.com/radionomics813"
+  },
+  {
+    "group": "hina",
+    "titleJp": "日向坂46平尾帆夏のひら砲らじお",
+    "titleEn": "Hirao Honoka no Hiraho Radio",
+    "dayJst": 6,
+    "startJst": "08:30",
+    "endJst": "08:45",
+    "hosts": "Hirao Honoka",
+    "stations": [
+      {
+        "name": "FM Sanin",
+        "call": "V-air",
+        "role": "key",
+        "freqKhz": 77400,
+        "band": "FM"
+      }
+    ],
+    "official": "https://www.fm-sanin.co.jp/program/hirahoradio",
+    "twitter": "https://x.com/hirahoradio"
+  },
+  {
+    "group": "hina",
+    "titleJp": "SONYSONPO QUEST FOR THE FUTURE",
+    "titleEn": "SONYSONPO QUEST FOR THE FUTURE",
+    "dayJst": 6,
+    "startJst": "00:00",
+    "endJst": "00:30",
+    "hosts": "Kosaka Nao",
+    "stations": [
+      {
+        "name": "J-WAVE",
+        "call": "JOAV",
+        "role": "key",
+        "freqKhz": 81300,
+        "band": "FM"
+      }
+    ],
+    "official": "https://www.j-wave.co.jp/original/questfuture/",
+    "twitter": "https://x.com/qff813_kosakana"
+  },
+  {
+    "group": "hina",
+    "titleJp": "ローソン presents 日向坂46のほっとひといき！",
+    "titleEn": "LAWSON presents Hinatazaka46 no Hotto Hitoiki!",
+    "dayJst": 5,
+    "startJst": "11:30",
+    "endJst": "11:55",
+    "hosts": "Takahashi Mikuni · Fujishima Kaho · Yamashita Haruka · Matsuo Sakura",
+    "stations": [
+      {
+        "name": "Tokyo FM",
+        "call": "JFN",
+        "role": "key",
+        "freqKhz": 80000,
+        "band": "FM"
+      }
+    ],
+    "official": "https://www.tfm.co.jp/hitoiki/",
+    "twitter": "https://x.com/hot_hitoiki46"
+  },
+  {
+    "group": "hina",
+    "titleJp": "日向坂46の「ひ」",
+    "titleEn": "Hinatazaka no \"Hi\"",
+    "dayJst": 0,
+    "startJst": "18:30",
+    "endJst": "19:00",
+    "hosts": "Kamimura Hinano",
+    "stations": [
+      {
+        "name": "Bunka Hōsō",
+        "call": "JOQR",
+        "role": "key",
+        "freqKhz": 1134,
+        "band": "AM",
+        "lat": 35.807,
+        "lon": 139.683,
+        "place": "Toda, Saitama",
+        "kiwis": [
+          {
+            "name": "0-30 MHZ SDR#1, JH1PGF, TOKYO, JAPAN. Up to eight users can listen simultaneously.",
+            "loc": "Adachi, Tokyo, Japan",
+            "locJp": "足立",
+            "tuneUrl": "http://kiwisdr.hirokinet.com:8074/?f=1134am",
+            "distKm": 12
+          },
+          {
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "loc": "Edogawa-ku, Tokyo, Japan",
+            "locJp": "江戸川区",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1134am",
+            "distKm": 19
+          },
+          {
+            "name": "0-30 MHz SDR | Tokyo, Japan",
+            "loc": "Tokyo, Japan",
+            "locJp": "東京",
+            "tuneUrl": "http://gnss.proxy.kiwisdr.com/?f=1134am",
+            "distKm": 20
+          },
+          {
+            "name": "0-30 MHz SDR, JP1ODJ, Saitama JAPAN",
+            "loc": "Okegawa Saitama JAPAN",
+            "locJp": "桶川",
+            "tuneUrl": "http://jp1odj.proxy.kiwisdr.com/?f=1134am",
+            "distKm": 26
+          },
+          {
+            "name": "0-30 MHz SDR,NDXA, JJ1LIB, Yokohama",
+            "loc": "Yokohama,Japan",
+            "locJp": "横浜",
+            "tuneUrl": "http://59.129.216.68:8073/?f=1134am",
+            "distKm": 40
+          }
+        ]
+      }
+    ],
+    "official": "https://www.joqr.co.jp/qr/program/hinatazaka/",
+    "twitter": "https://x.com/hinata_joqr"
+  }
+];
+window.__BUILD_TIME__ = "2026-06-13 22:39 UTC";
+</script>
+<script>
+// =========================================================================
+// Sakamichi Radio — agenda view.
+// All data is a weekly-recurring schedule (window.__SHOWS__, injected at build
+// time). "Now" / "up next" are computed live in the browser by projecting each
+// show onto the real timeline, so the page is correct whenever it is opened.
+// =========================================================================
+
+const SHOWS = window.__SHOWS__ || [];
+const BUILD_TIME = window.__BUILD_TIME__ || '';
+
+const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const dayNamesLong = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const WEEK_MS = 7 * 86400000;
+// Anchor: 2026-05-24 00:00 JST is a Sunday. day_jst is measured from here.
+const REF_SUNDAY_JST = Date.parse('2026-05-24T00:00:00+09:00');
+// How far ahead the "Up Next" feed looks.
+const HORIZON_MS = 7 * 86400000;
+
+// ---- UI state ----
+let currentTz = 'Asia/Tokyo';
+let bandFilter = 'ALL';
+let groupFilter = 'ALL';
+
+// Local timezone abbreviation (e.g. "EDT"); falls back to "Local".
+function localAbbr() {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' }).formatToParts(new Date());
+    return (parts.find(p => p.type === 'timeZoneName') || {}).value || 'Local';
+  } catch (e) { return 'Local'; }
+}
+// Short label for the currently displayed timezone.
+function tzShortLabel() {
+  if (currentTz === 'Asia/Tokyo') return 'JST';
+  if (currentTz === 'UTC') return 'UTC';
+  return localAbbr();
+}
+
+// ---- time helpers ----
+function parseTime(s) {
+  const [h, m] = s.split(':').map(Number);
+  return h * 60 + m;
+}
+function resolveTz(tz) {
+  if (tz === 'LOCAL') return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return tz;
+}
+// Break a Date into its weekday + h:m in a given tz.
+function partsInTz(date, tz) {
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: resolveTz(tz),
+    weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+  const p = {};
+  for (const part of fmt.formatToParts(date)) p[part.type] = part.value;
+  let hour = parseInt(p.hour, 10);
+  if (hour === 24) hour = 0;
+  return {
+    dayIdx: dayNames.indexOf(p.weekday),
+    h: hour,
+    m: parseInt(p.minute, 10),
+    dateKey: `${p.year}-${p.month}-${p.day}`,
+    label: `${p.weekday} ${String(hour).padStart(2, '0')}:${p.minute}`,
+  };
+}
+function fmtHM(date, tz) {
+  const p = partsInTz(date, tz);
+  return `${String(p.h).padStart(2, '0')}:${String(p.m).padStart(2, '0')}`;
+}
+function fmtFreq(st) {
+  return st.band === 'FM' ? `${(st.freqKhz / 1000).toFixed(1)} MHz` : `${st.freqKhz} kHz`;
+}
+// Collapse a verbose receiver location to something short for a button.
+function shortLoc(loc, name) {
+  let s = (loc || '').split(',')[0].trim();
+  s = s.replace(/\bjapan\b/i, '').trim();
+  if (!s) s = (name || '').split('|')[0].trim();
+  return s || 'SDR';
+}
+
+// Absolute start/end (ms) of this show's occurrence in the reference week,
+// plus the most-relevant occurrence around `now` (live + next upcoming).
+function occurrence(show, nowMs) {
+  const startMin = parseTime(show.startJst);
+  const durMs = (parseTime(show.endJst) - startMin) * 60000;
+  const baseStart = REF_SUNDAY_JST + show.dayJst * 86400000 + startMin * 60000;
+  const k = Math.round((nowMs - baseStart) / WEEK_MS);
+  let live = null, next = null;
+  for (let i = k - 2; i <= k + 2; i++) {
+    const s = baseStart + i * WEEK_MS;
+    const e = s + durMs;
+    if (nowMs >= s && nowMs < e) live = { start: s, end: e };
+    if (s > nowMs && (!next || s < next.start)) next = { start: s, end: e };
+  }
+  return { live, next };
+}
+
+function passesFilter(show) {
+  if (bandFilter !== 'ALL' && !show.stations.some(st => st.band === bandFilter)) return false;
+  if (groupFilter !== 'ALL' && show.group !== groupFilter) return false;
+  return true;
+}
+
+function relTime(deltaMs) {
+  if (deltaMs <= 0) return 'on air';
+  const min = Math.round(deltaMs / 60000);
+  if (min < 1) return 'in <1 min';
+  if (min < 60) return `in ${min} min`;
+  const h = Math.floor(min / 60), m = min % 60;
+  if (h < 24) return m ? `in ${h}h ${m}m` : `in ${h}h`;
+  const d = Math.round(h / 24);
+  return `in ${d} day${d === 1 ? '' : 's'}`;
+}
+
+// ---- DOM builders ----
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+const ICON_GLOBE = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg>';
+const ICON_X = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.656l-5.214-6.817-5.966 6.817H1.683l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"/></svg>';
+
+function linksHtml(show) {
+  const parts = [];
+  if (show.official) parts.push(`<a class="lnk" href="${esc(show.official)}" target="_blank" rel="noopener" aria-label="Official site">${ICON_GLOBE}<span class="tip"><span class="tip-title">Official site</span></span></a>`);
+  if (show.twitter) parts.push(`<a class="lnk" href="${esc(show.twitter)}" target="_blank" rel="noopener" aria-label="Twitter / X">${ICON_X}<span class="tip"><span class="tip-title">Twitter / X</span></span></a>`);
+  return parts.join('');
+}
+function sdrButtonsHtml(show) {
+  const st = show.stations[0];
+  if (st.band === 'FM') return `<span class="sdr-na">FM · no SDR</span>`;
+  if (!(st.kiwis && st.kiwis.length)) return `<span class="sdr-na">no nearby SDR</span>`;
+  return st.kiwis.map(k => {
+    const label = k.locJp || shortLoc(k.loc, k.name);   // Japanese place name; English fallback
+    const en = shortLoc(k.loc, k.name);
+    const tip = '<span class="tip">'
+      + `<span class="tip-title">${esc(en)}</span>`
+      + `<span class="tip-sub">${esc(k.name || k.loc)}</span>`
+      + `<span class="tip-meta">${k.distKm} km from transmitter</span>`
+      + '</span>';
+    return `<a class="sdr-btn" href="${esc(k.tuneUrl)}" target="_blank" rel="noopener">${esc(label)}${tip}</a>`;
+  }).join('');
+}
+function cardEl(show, inst, nowMs) {
+  const start = new Date(inst.start), end = new Date(inst.end);
+  const isJst = resolveTz(currentTz) === 'Asia/Tokyo';
+  const live = nowMs >= inst.start && nowMs < inst.end;
+
+  const allFm = show.stations.every(s => s.band === 'FM');
+  const cls = ['card', 'group-' + show.group];
+  if (allFm) cls.push('fm');
+  if (live) cls.push('live');
+
+  const rel = live ? `● on air · ends ${fmtHM(end, currentTz)}` : relTime(inst.start - nowMs);
+  let timeLine = `${fmtHM(start, currentTz)}–${fmtHM(end, currentTz)}`;
+  if (!isJst) {
+    const jstS = fmtHM(start, 'Asia/Tokyo'), jstE = fmtHM(end, 'Asia/Tokyo');
+    timeLine += `<span class="alt">JST ${jstS}–${jstE}</span>`;
+  }
+
+  const title = show.official
+    ? `<a class="card-jp" href="${esc(show.official)}" target="_blank" rel="noopener">${esc(show.titleJp)}</a>`
+    : `<span class="card-jp">${esc(show.titleJp)}</span>`;
+
+  const links = linksHtml(show);
+
+  const div = document.createElement('div');
+  div.className = cls.join(' ');
+  div.innerHTML = `
+    <div class="card-head">
+      <div class="card-headline">
+        ${title}
+        <div class="card-en">${esc(show.titleEn)}</div>
+        <div class="card-host">${esc(show.hosts)}</div>
+      </div>
+      <div class="card-freqbox">
+        <div class="card-freq">${esc(fmtFreq(show.stations[0]))}</div>
+        <div class="card-station">
+          <span class="st-call">${esc(show.stations[0].call)}</span>
+          <span class="st-name">${esc(show.stations[0].name)}</span>
+        </div>
+        <div class="card-sched">
+          <div class="card-rel">${rel}</div>
+          <div class="card-time">${timeLine}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-foot">
+      ${links}
+      ${links ? '<span class="foot-sep"></span>' : ''}
+      ${sdrButtonsHtml(show)}
+    </div>`;
+  return div;
+}
+
+// ---- renderers ----
+let pinnedKey = null;     // title_jp clicked in the timetable (persists), or null = auto
+let hoverKey = null;      // title_jp being hovered (temporary preview), or null
+let heroKeys = new Set(); // title_jp(s) currently shown in the Spotlight (drives block highlight)
+let ctxShows = [], ctxNow = null, ctxNowMs = 0;
+
+function render() {
+  ctxNow = new Date();
+  ctxNowMs = ctxNow.getTime();
+  ctxShows = SHOWS.filter(passesFilter);
+
+  renderHero();
+  renderTimetable(ctxShows, ctxNow);
+  updateBlockSelection();
+  renderUpNext();
+}
+
+// Chronological list of every show's next occurrence (next 7 days), grouped by day.
+function renderUpNext() {
+  const root = document.getElementById('upNext');
+  const count = document.getElementById('upNextCount');
+  const now = ctxNow, nowMs = ctxNowMs;
+  const items = [];
+  for (const show of ctxShows) {
+    const occ = occurrence(show, nowMs);
+    if (occ.next && occ.next.start - nowMs <= HORIZON_MS) items.push({ show, inst: occ.next });
+  }
+  items.sort((a, b) => a.inst.start - b.inst.start);
+  root.innerHTML = '';
+  count.textContent = items.length ? `${items.length} shows` : '';
+  if (!items.length) {
+    root.innerHTML = `<div class="empty-msg">No upcoming shows in the next 7 days for this filter.</div>`;
+    return;
+  }
+  const todayKey = partsInTz(now, currentTz).dateKey;
+  const tomorrowKey = partsInTz(new Date(nowMs + 86400000), currentTz).dateKey;
+
+  let lastKey = null, cardsEl = null;
+  for (const { show, inst } of items) {
+    const p = partsInTz(new Date(inst.start), currentTz);
+    if (p.dateKey !== lastKey) {
+      lastKey = p.dateKey;
+      let rel = dayNamesLong[p.dayIdx];
+      if (p.dateKey === todayKey) rel = 'Today';
+      else if (p.dateKey === tomorrowKey) rel = 'Tomorrow';
+      const [y, mo, d] = p.dateKey.split('-');
+      const groupEl = document.createElement('div');
+      groupEl.className = 'day-group';
+      groupEl.innerHTML = `<div class="day-head"><span class="d-rel">${rel}</span><span class="d-date">${dayNames[p.dayIdx]} ${y}-${mo}-${d}</span></div>`;
+      cardsEl = document.createElement('div');
+      cardsEl.className = 'cards';
+      groupEl.appendChild(cardsEl);
+      root.appendChild(groupEl);
+    }
+    cardsEl.appendChild(cardEl(show, inst, nowMs));
+  }
+}
+
+// Left infocard: a manual pick if still valid, else whatever is live now,
+// else the next show chronologically.
+function renderHero() {
+  const card = document.getElementById('heroCard');
+
+  const liveList = [];
+  let next = null;
+  for (const show of ctxShows) {
+    const occ = occurrence(show, ctxNowMs);
+    if (occ.live) liveList.push({ show, inst: occ.live });
+    if (occ.next && (!next || occ.next.start < next.inst.start)) next = { show, inst: occ.next };
+  }
+  liveList.sort((a, b) => a.inst.end - b.inst.end);
+
+  // hover/pin shows just that one; otherwise ALL currently-live shows; else the next one
+  let items = [];
+  const activeKey = hoverKey || pinnedKey;
+  if (activeKey) {
+    const show = ctxShows.find(s => s.titleJp === activeKey);
+    if (show) {
+      const occ = occurrence(show, ctxNowMs);
+      items = [{ show, inst: occ.live || occ.next }];
+    }
+  }
+  if (!items.length) items = liveList.length ? liveList : (next ? [next] : []);
+
+  card.innerHTML = '';
+  heroKeys = new Set(items.map(it => it.show.titleJp));
+  if (!items.length) {
+    card.innerHTML = `<div class="empty-msg">No shows for this filter.</div>`;
+    return;
+  }
+  for (const it of items) card.appendChild(cardEl(it.show, it.inst, ctxNowMs));
+}
+
+function setHover(key) {        // temporary preview on hover
+  if (hoverKey === key) return;
+  hoverKey = key;
+  renderHero();
+  updateBlockSelection();
+}
+function pinShow(key) {         // click pins it as the new default
+  pinnedKey = key;
+  hoverKey = key;
+  renderHero();
+  updateBlockSelection();
+}
+
+function updateBlockSelection() {
+  document.querySelectorAll('#timetable .tt-block').forEach(b => {
+    b.classList.toggle('sel', heroKeys.has(b.dataset.key));
+  });
+}
+
+// ---- week timetable ----
+const HOUR_PX = 16;   // fixed 24h grid kept within the existing height
+
+function fmtMin(min) {
+  if (min >= 1440) return '24:00';
+  const h = Math.floor(min / 60) % 24, m = Math.round(min % 60);
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+// Day-of-week segments for a show in the displayed tz; splits midnight crossings.
+function segmentsInTz(show, tz) {
+  const startMin0 = parseTime(show.startJst);
+  const baseStart = REF_SUNDAY_JST + show.dayJst * 86400000 + startMin0 * 60000;
+  const baseEnd = baseStart + (parseTime(show.endJst) - startMin0) * 60000;
+  const s = partsInTz(new Date(baseStart), tz);
+  const e = partsInTz(new Date(baseEnd), tz);
+  const sMin = s.h * 60 + s.m, eMin = e.h * 60 + e.m;
+  if (s.dayIdx === e.dayIdx && eMin > sMin) return [{ day: s.dayIdx, start: sMin, end: eMin }];
+  const segs = [{ day: s.dayIdx, start: sMin, end: 1440 }];
+  let cur = (s.dayIdx + 1) % 7, guard = 0;
+  while (cur !== e.dayIdx && guard++ < 7) { segs.push({ day: cur, start: 0, end: 1440 }); cur = (cur + 1) % 7; }
+  if (eMin > 0) segs.push({ day: e.dayIdx, start: 0, end: eMin });
+  return segs;
+}
+
+// Lay overlapping segments within a day into side-by-side lanes (per cluster).
+function assignLanes(items) {
+  items.sort((a, b) => a.start - b.start || a.end - b.end);
+  let cluster = [], clusterEnd = -1;
+  const flush = () => {
+    const laneEnds = [];
+    for (const it of cluster) {
+      let placed = false;
+      for (let l = 0; l < laneEnds.length; l++) {
+        if (it.start >= laneEnds[l]) { it.lane = l; laneEnds[l] = it.end; placed = true; break; }
+      }
+      if (!placed) { it.lane = laneEnds.length; laneEnds.push(it.end); }
+    }
+    for (const it of cluster) it.lanes = laneEnds.length;
+    cluster = []; clusterEnd = -1;
+  };
+  for (const it of items) {
+    if (cluster.length && it.start >= clusterEnd) flush();
+    cluster.push(it); clusterEnd = Math.max(clusterEnd, it.end);
+  }
+  if (cluster.length) flush();
+}
+
+function renderTimetable(shows, now) {
+  const grid = document.getElementById('timetable');
+  document.getElementById('ttTz').textContent = tzShortLabel();
+  grid.innerHTML = '';
+
+  const perDay = Array.from({ length: 7 }, () => []);
+  for (const show of shows) {
+    for (const seg of segmentsInTz(show, currentTz)) {
+      if (seg.end <= seg.start) continue;
+      perDay[seg.day].push({ ...seg, show });
+    }
+  }
+
+  // always a full 00:00–24:00 day
+  const startHour = 0, endHour = 24;
+  const PAD = 11;  // buffer so the top/bottom hour labels aren't clipped
+  const bodyH = 24 * HOUR_PX + PAD * 2;
+  const y = min => PAD + min / 60 * HOUR_PX;
+  grid.style.gridTemplateColumns = '46px repeat(7, 1fr)';
+
+  const today = partsInTz(now, currentTz);
+  const nowY = y(today.h * 60 + today.m);
+
+  // header row: corner + 7 day names
+  const corner = document.createElement('div');
+  corner.className = 'tt-corner';
+  grid.appendChild(corner);
+  for (let d = 0; d < 7; d++) {
+    const h = document.createElement('div');
+    h.className = 'tt-dayhead' + (d === today.dayIdx ? ' today' : '');
+    h.textContent = dayNamesLong[d];
+    grid.appendChild(h);
+  }
+
+  // body row: time gutter + 7 day columns
+  const gutter = document.createElement('div');
+  gutter.className = 'tt-gutter';
+  gutter.style.height = `${bodyH}px`;
+  for (let hh = startHour; hh <= endHour; hh++) {
+    const lbl = document.createElement('div');
+    lbl.className = 'tt-hour';
+    lbl.style.top = `${y(hh * 60)}px`;
+    lbl.textContent = String(hh % 24).padStart(2, '0') + ':00';
+    gutter.appendChild(lbl);
+  }
+  grid.appendChild(gutter);
+
+  for (let d = 0; d < 7; d++) {
+    const col = document.createElement('div');
+    col.className = 'tt-col' + (d === today.dayIdx ? ' today' : '');
+    col.style.height = `${bodyH}px`;
+    for (let hh = startHour + 1; hh < endHour; hh++) {
+      const ln = document.createElement('div');
+      ln.className = 'tt-line';
+      ln.style.top = `${y(hh * 60)}px`;
+      col.appendChild(ln);
+    }
+    if (d === today.dayIdx && nowY >= 0 && nowY <= bodyH) {
+      const nl = document.createElement('div');
+      nl.className = 'tt-now';
+      nl.style.top = `${nowY}px`;
+      col.appendChild(nl);
+    }
+    const items = perDay[d];
+    assignLanes(items);
+    for (const it of items) {
+      const n = it.lanes || 1, lane = it.lane || 0;
+      const blk = document.createElement('div');
+      blk.className = `tt-block g-${it.show.group}` + (it.show.stations[0].band === 'FM' ? ' fm' : '');
+      blk.dataset.key = it.show.titleJp;   // click → show in the left infocard
+      blk.style.top = `${y(it.start)}px`;
+      blk.style.height = `${Math.max(y(it.end) - y(it.start) - 1, 9)}px`;
+      blk.style.left = `calc(${(lane / n) * 100}% + 2px)`;
+      blk.style.right = `calc(${((n - lane - 1) / n) * 100}% + 2px)`;
+      col.appendChild(blk);
+    }
+    grid.appendChild(col);
+  }
+}
+
+function updateClock() {
+  const fmt = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Tokyo',
+    weekday: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  });
+  const p = {};
+  for (const part of fmt.formatToParts(new Date())) p[part.type] = part.value;
+  document.getElementById('jstClock').textContent = `${p.weekday} ${p.hour}:${p.minute}:${p.second}`;
+}
+
+// ---- wiring ----
+window.addEventListener('DOMContentLoaded', () => {
+  const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  document.querySelector('#tzSelect option[value="LOCAL"]').textContent = `${localAbbr()} Local`;
+  document.querySelector('#tzSelect option[value="LOCAL"]').title = localTz;
+
+  document.getElementById('tzSelect').addEventListener('change', e => { currentTz = e.target.value; render(); });
+  document.querySelectorAll('#bandFilter button').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('#bandFilter button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active'); bandFilter = btn.dataset.filter; render();
+  }));
+  document.querySelectorAll('#groupFilter button').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('#groupFilter button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active'); groupFilter = btn.dataset.group; render();
+  }));
+  if (BUILD_TIME) document.getElementById('buildStamp').textContent = `Built ${BUILD_TIME}`;
+
+  // hover a timetable block to preview it on the left; click to pin it
+  const tt = document.getElementById('timetable');
+  tt.addEventListener('mouseover', e => {
+    const blk = e.target.closest('.tt-block');
+    setHover(blk ? blk.dataset.key : null);
+  });
+  tt.addEventListener('mouseleave', () => setHover(null));
+  tt.addEventListener('click', e => {
+    const blk = e.target.closest('.tt-block');
+    if (blk && blk.dataset.key) pinShow(blk.dataset.key);
+  });
+
+  updateClock();
+  render();
+  setInterval(updateClock, 1000);   // ticking JST clock
+  setInterval(render, 30000);       // refresh now/next every 30s
+});
+
+</script>
+</body>
+</html>
