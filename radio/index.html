@@ -99,36 +99,66 @@ header {
 
 /* ============ CONTROLS ============ */
 .controls {
-  display: grid;
-  grid-template-columns: minmax(170px, auto) minmax(160px, auto) minmax(170px, auto) 1fr;
-  gap: 18px;
-  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 18px;
+  align-items: flex-end;
   padding: 16px 18px;
   background: var(--surface);
   border: 1px solid var(--border);
   margin-bottom: 24px;
 }
-.ctrl { display: flex; flex-direction: column; gap: 6px; }
+.ctrl { display: flex; flex-direction: column; gap: 6px; flex: 0 0 auto; }
 .ctrl label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-3); }
 select, input[type=text] {
   background: var(--bg);
   border: 1px solid var(--border);
   color: var(--text);
-  padding: 9px 11px;
+  height: 34px;
+  padding: 0 11px;
   font-family: var(--sans);
   font-size: 12px;
-  border-radius: 0;
+  border-radius: 3px;
   outline: none;
   transition: border-color 150ms;
 }
 select:focus, input[type=text]:focus { border-color: var(--accent); }
 input[type=text] { width: 100%; }
-.filter-toggle { display: flex; border: 1px solid var(--border); }
+.filter-toggle { display: flex; border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+/* a colour bar along the bottom makes the group filter double as the legend */
+#groupFilter button[data-group="nogi"] { box-shadow: inset 0 -3px 0 var(--nogi); }
+#groupFilter button[data-group="saku"] { box-shadow: inset 0 -3px 0 var(--saku); }
+#groupFilter button[data-group="hina"] { box-shadow: inset 0 -3px 0 var(--hina); }
+/* calendar feed button, at the right end of the Schedule heading */
+.cal-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--border-bright);
+  border-radius: 3px;
+  background: var(--surface-2);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 150ms, border-color 150ms;
+}
+.cal-btn:hover { color: var(--text); border-color: var(--accent-deep); }
+.cal-btn .tip { left: auto; right: 0; transform: translateY(4px); }
+.cal-btn:hover .tip { opacity: 1; visibility: visible; transform: translateY(0); }
+.cal-btn .tip::after { left: auto; right: 18px; transform: none; }
 .filter-toggle button {
   background: var(--bg);
   border: none;
   color: var(--text-2);
-  padding: 9px 12px;
+  height: 32px;
+  min-width: 64px;
+  padding: 0 12px;
   font-family: var(--sans);
   font-size: 11px;
   letter-spacing: 0.15em;
@@ -136,6 +166,7 @@ input[type=text] { width: 100%; }
   cursor: pointer;
   transition: all 150ms;
   flex: 1;
+  white-space: nowrap;
 }
 .filter-toggle button:not(:last-child) { border-right: 1px solid var(--border); }
 .filter-toggle button:hover { color: var(--text); }
@@ -160,7 +191,6 @@ input[type=text] { width: 100%; }
   margin: 0 0 14px;
   color: var(--text);
 }
-.section-title .count { color: var(--text-3); }
 .section-title .rule { flex: 1; height: 1px; background: var(--border); }
 .section-title .count { color: var(--text-3); font-weight: 400; letter-spacing: 0.1em; }
 
@@ -252,13 +282,14 @@ input[type=text] { width: 100%; }
   width: 30px;
   height: 30px;
   border: 1px solid var(--border-bright);
-  border-radius: 7px;
+  border-radius: 3px;
   background: var(--surface-2);
   color: var(--text-2);
   transition: color 130ms, border-color 130ms, background 130ms;
 }
 .lnk:hover { color: var(--text); border-color: var(--accent-deep); background: var(--surface-3); z-index: 20; }
 .lnk svg { display: block; }
+.lnk.radiko { width: auto; padding: 0 9px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-decoration: none; }
 
 .card-freqbox {
   flex-shrink: 0;
@@ -278,9 +309,10 @@ input[type=text] { width: 100%; }
 .card.group-hina .card-freq { color: var(--hina); }
 /* FM / no-SDR cards: desaturate the group accent (border, title, frequency) */
 /* FM (no-SDR): card faded/translucent, but the explanation note stays readable */
-.card.fm { background: color-mix(in srgb, var(--surface-2), transparent 45%); }
-.card.fm .card-head, .card.fm .lnk, .card.fm .foot-sep { opacity: 0.5; }
-.card.fm .sdr-none { opacity: 0.92; }
+.card.fm { background: color-mix(in srgb, var(--surface-2), transparent 25%); }
+.card.fm .card-freqbox { opacity: 0.8; }
+/* FM: the frequency is not a tuning target, so it drops to station-line weight */
+.card.fm .card-freq { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; line-height: 1.4; }
 .card.fm.group-nogi { border-left-color: var(--nogi-mute); }
 .card.fm.group-saku { border-left-color: var(--saku-mute); }
 .card.fm.group-hina { border-left-color: var(--hina-mute); }
@@ -289,7 +321,7 @@ input[type=text] { width: 100%; }
 .card.fm.group-hina .card-jp, .card.fm.group-hina .card-freq { color: var(--hina-mute); }
 .card-station { margin-top: 4px; line-height: 1.3; white-space: nowrap; }
 .card-station .st-call { display: block; font-size: 11px; font-weight: 600; color: var(--text-2); letter-spacing: 0.04em; }
-.card-station .st-name { display: block; font-size: 10px; color: var(--text-3); letter-spacing: 0.02em; }
+.card-station .st-name { display: block; font-size: 11px; color: var(--text-3); letter-spacing: 0.02em; }
 
 /* host sits immediately beneath the show name */
 .card-host { font-size: 16px; font-weight: 500; color: var(--text); line-height: 1.35; margin-top: 8px; }
@@ -305,7 +337,7 @@ input[type=text] { width: 100%; }
 }
 .card.live .card-rel { color: var(--signal); font-weight: 600; }
 .card-time { color: var(--text); font-size: 11px; margin-top: 3px; white-space: nowrap; }
-.card-time .alt { color: var(--text-3); font-size: 9px; display: block; margin-top: 1px; letter-spacing: 0.03em; }
+.card-time .alt { color: var(--text-3); font-size: 10.5px; display: block; margin-top: 1px; letter-spacing: 0.03em; }
 
 /* bottom action row: website / twitter buttons, a divider, then SDR tune
    buttons -- all flat siblings so they share one baseline/center. */
@@ -319,7 +351,7 @@ input[type=text] { width: 100%; }
   height: 30px;
   padding: 0 11px;
   border: 1px solid var(--border-bright);
-  border-radius: 7px;
+  border-radius: 3px;
   background: var(--surface-2);
   color: var(--accent);
   text-decoration: none;
@@ -336,17 +368,20 @@ input[type=text] { width: 100%; }
 /* prominent "no SDR" note for FM shows */
 .sdr-none {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
   flex: 1;
   min-width: 0;
-  padding: 8px 11px;
+  min-height: 30px;
+  padding: 5px 11px;
   border: 1px dashed var(--border-bright);
-  border-radius: 7px;
+  border-radius: 3px;
   background: var(--surface-2);
 }
-.sdr-none-h { font-size: 11.5px; font-weight: 600; color: var(--danger); letter-spacing: 0.05em; text-transform: uppercase; }
-.sdr-none-t { font-size: 10.5px; color: var(--text-2); line-height: 1.4; }
+.sdr-none-h { font-size: 11px; font-weight: 600; color: var(--danger); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
+.sdr-none-t { font-size: 11px; color: var(--text-2); line-height: 1.4; }
 
 /* custom hover infobox (SDR buttons, link buttons) */
 .tip {
@@ -366,7 +401,7 @@ input[type=text] { width: 100%; }
   font-style: normal;
   background: var(--surface);
   border: 1px solid var(--border-bright);
-  border-radius: 8px;
+  border-radius: 4px;
   box-shadow: 0 10px 26px rgba(0,0,0,0.6);
   opacity: 0;
   visibility: hidden;
@@ -387,17 +422,19 @@ input[type=text] { width: 100%; }
 .card.group-nogi .tip-title { color: var(--nogi); }
 .card.group-saku .tip-title { color: var(--saku); }
 .card.group-hina .tip-title { color: var(--hina); }
-.tip-sub { color: var(--text-2); font-size: 10px; line-height: 1.35; }
-.tip-meta { color: var(--text-3); font-size: 9.5px; font-variant-numeric: tabular-nums; letter-spacing: 0.03em; }
+.tip-sub { color: var(--text-2); font-size: 11px; line-height: 1.35; }
+.tip-meta { color: var(--text-3); font-size: 10.5px; font-variant-numeric: tabular-nums; letter-spacing: 0.03em; }
 
 /* ============ WEEK TIMETABLE ============ */
 .tt-section { margin-bottom: 24px; }
 .tt-scroll {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   border: 1px solid var(--border);
   background: var(--surface);
 }
-.tt-grid { display: grid; position: relative; }
+.tt-grid { display: grid; position: relative; min-width: 330px; }
+.tt-dayhead .d-short { display: none; }
 
 .tt-corner, .tt-dayhead {
   position: sticky;
@@ -424,7 +461,7 @@ input[type=text] { width: 100%; }
   position: absolute;
   right: 6px;
   transform: translateY(-50%);
-  font-size: 9px;
+  font-size: 10px;
   color: var(--text-3);
   font-variant-numeric: tabular-nums;
 }
@@ -464,7 +501,7 @@ input[type=text] { width: 100%; }
   gap: 18px;
   align-items: center;
   flex-wrap: wrap;
-  padding: 12px 0;
+  padding: 0 2px;
   font-size: 10px;
   color: var(--text-3);
   letter-spacing: 0.1em;
@@ -472,6 +509,7 @@ input[type=text] { width: 100%; }
 }
 .legend-item { display: flex; align-items: center; gap: 6px; }
 .legend-swatch { width: 14px; height: 14px; border-left: 3px solid; background: var(--surface-3); }
+.legend-swatch.fm { border-left-color: var(--text-3); opacity: 0.55; }
 
 footer {
   margin-top: 24px;
@@ -484,8 +522,8 @@ footer {
 footer .footnote { margin: 6px 0; }
 footer strong { color: var(--text-2); }
 footer a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
-footer code { background: var(--surface-2); padding: 1px 4px; color: var(--accent); font-size: 10px; }
-.build-stamp { margin-top: 10px; color: var(--text-3); opacity: 0.7; font-size: 10px; }
+footer code { background: var(--surface-2); padding: 1px 4px; color: var(--accent); font-size: 11px; }
+.build-stamp { margin-top: 10px; color: var(--text-3); opacity: 0.7; font-size: 11px; }
 
 @media (max-width: 980px) {
   .layout { grid-template-columns: 1fr; }
@@ -493,8 +531,13 @@ footer code { background: var(--surface-2); padding: 1px 4px; color: var(--accen
 }
 @media (max-width: 720px) {
   body { padding: 16px 10px 40px; }
-  .controls { grid-template-columns: 1fr; }
+  .ctrl { flex: 1 1 100%; }
+  .filter-toggle, select { align-self: flex-start; }   /* keep the same button size as on desktop */
+  .cal-btn { justify-content: center; }
   .cards { grid-template-columns: 1fr; }
+  .tt-dayhead { padding: 9px 2px; letter-spacing: 0.08em; }
+  .tt-dayhead .d-long { display: none; }
+  .tt-dayhead .d-short { display: inline; }
 }
 
 </style>
@@ -556,24 +599,26 @@ footer code { background: var(--surface-2); padding: 1px 4px; color: var(--accen
           <div class="tt-grid" id="timetable"></div>
         </div>
       </section>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch" style="border-color: var(--nogi)"></div>Nogizaka46</div>
+        <div class="legend-item"><div class="legend-swatch" style="border-color: var(--saku)"></div>Sakurazaka46</div>
+        <div class="legend-item"><div class="legend-swatch" style="border-color: var(--hina)"></div>Hinatazaka46</div>
+        <div class="legend-item"><div class="legend-swatch" style="border-color: var(--signal); background: var(--signal-faint)"></div>Live now</div>
+        <div class="legend-item"><div class="legend-swatch fm"></div>FM · no SDR</div>
+      </div>
     </aside>
   </div>
 
   <section class="up-next">
-    <h2 class="section-title">Schedule <span class="count" id="upNextCount"></span><span class="rule"></span></h2>
+    <h2 class="section-title">Schedule <span class="count" id="upNextCount"></span><span class="rule"></span><a class="cal-btn" id="icsLink" href="radio.ics">Subscribe (.ics)<span class="tip"><span class="tip-title">Calendar feed</span><span class="tip-sub">Every show as a weekly event in JST; follows the group filter. Import the file, or subscribe to the webcal:// address (see footer) for automatic updates.</span></span></a></h2>
     <div id="upNext"></div>
   </section>
-
-  <div class="legend">
-    <div class="legend-item"><div class="legend-swatch" style="border-color: var(--nogi)"></div>Nogizaka46</div>
-    <div class="legend-item"><div class="legend-swatch" style="border-color: var(--saku)"></div>Sakurazaka46</div>
-    <div class="legend-item"><div class="legend-swatch" style="border-color: var(--hina)"></div>Hinatazaka46</div>
-    <div class="legend-item"><div class="legend-swatch" style="border-color: var(--signal); background: var(--signal-faint)"></div>Live now</div>
-  </div>
 
   <footer>
     <div class="footnote"><strong>Listen via SDR.</strong> Each AM station shows its 5 nearest public <a href="http://rx.linkfanel.net/" target="_blank" rel="noopener">KiwiSDR</a> receivers (by distance from the transmitter), each opening that KiwiSDR pre-tuned to the frequency in AM mode (<code>/?f={freq}am</code>). The receiver list is pulled fresh each time the page is rebuilt. FM stations have no SDR option — KiwiSDRs only cover ~0–30 MHz and cannot receive Japanese FM (76–95 MHz).</div>
     <div class="footnote"><strong>Before you tune in.</strong> KiwiSDR slots are limited and most receivers enforce a per-user time limit, so you may be disconnected or find a receiver full. KiwiSDRs display the city connected users are listening from, so you might want to use a VPN if it bothers you.</div>
+    <div class="footnote"><strong>FM shows.</strong> KiwiSDRs stop at 30 MHz, so FM shows can't be tuned; their <em>radiko</em> button opens the show on radiko, which streams inside Japan only — overseas you need a VPN with a Japanese endpoint.</div>
+    <div class="footnote"><strong>Calendar.</strong> <a href="radio.ics">radio.ics</a> has every show as a weekly event in JST (per group: <a href="radio-nogi.ics">nogi</a> · <a href="radio-saku.ics">saku</a> · <a href="radio-hina.ics">hina</a>). Subscribe to <code>webcal://breadslope46.github.io/radio/radio.ics</code> and your calendar picks up schedule changes on its own.</div>
     <div class="footnote"><strong>Source.</strong> Schedule compiled from <a href="https://46fansina.com/radio-shows" target="_blank" rel="noopener">46FansINA</a>.</div>
     <div class="build-stamp" id="buildStamp"></div>
   </footer>
@@ -599,7 +644,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": null,
-    "twitter": "https://x.com/fmfujiaoiro1gou"
+    "twitter": "https://x.com/fmfujiaoiro1gou",
+    "radiko": "https://radiko.jp/r_seasons/10032673"
   },
   {
     "group": "nogi",
@@ -628,10 +674,10 @@ window.__SHOWS__ = [
             "distKm": 12
           },
           {
-            "name": "3.5-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
             "loc": "Edogawa-ku, Tokyo, Japan",
             "locJp": "江戸川区",
-            "tuneUrl": "http://21554.proxy.kiwisdr.com/?f=1134am",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1134am",
             "distKm": 19
           },
           {
@@ -659,7 +705,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.joqr.co.jp/qr/program/reco/",
-    "twitter": "https://x.com/reco_oshirase"
+    "twitter": "https://x.com/reco_oshirase",
+    "radiko": null
   },
   {
     "group": "nogi",
@@ -720,7 +767,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.tokairadio.co.jp/program/okahina/",
-    "twitter": "https://x.com/okahinajikan"
+    "twitter": "https://x.com/okahinajikan",
+    "radiko": "https://radiko.jp/r_seasons/10029882"
   },
   {
     "group": "nogi",
@@ -740,7 +788,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://program.bayfm.co.jp/aya/",
-    "twitter": "https://x.com/aya78MHz"
+    "twitter": "https://x.com/aya78MHz",
+    "radiko": "https://radiko.jp/r_seasons/10029305"
   },
   {
     "group": "nogi",
@@ -760,7 +809,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://program.bayfm.co.jp/yuna/",
-    "twitter": "https://x.com/yuna78MHz"
+    "twitter": "https://x.com/yuna78MHz",
+    "radiko": "https://radiko.jp/r_seasons/10019446"
   },
   {
     "group": "nogi",
@@ -780,7 +830,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.tfm.co.jp/lock/nogizaka46/",
-    "twitter": "https://x.com/sol_info"
+    "twitter": "https://x.com/sol_info",
+    "radiko": null
   },
   {
     "group": "nogi",
@@ -800,7 +851,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.tfm.co.jp/nogizakasoudan/",
-    "twitter": "https://x.com/soudan_tfm"
+    "twitter": "https://x.com/soudan_tfm",
+    "radiko": "https://radiko.jp/podcast/channels/bbce66a8-d592-4dac-bfc6-5b961e9be86c"
   },
   {
     "group": "nogi",
@@ -843,10 +895,10 @@ window.__SHOWS__ = [
             "distKm": 27
           },
           {
-            "name": "3.5-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
             "loc": "Edogawa-ku, Tokyo, Japan",
             "locJp": "江戸川区",
-            "tuneUrl": "http://21554.proxy.kiwisdr.com/?f=1242am",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1242am",
             "distKm": 38
           },
           {
@@ -860,7 +912,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.allnightnippon.com/nogizaka46/",
-    "twitter": "https://x.com/NOGI46ann"
+    "twitter": "https://x.com/NOGI46ann",
+    "radiko": "https://radiko.jp/r_seasons/49399"
   },
   {
     "group": "nogi",
@@ -896,10 +949,10 @@ window.__SHOWS__ = [
             "distKm": 40
           },
           {
-            "name": "3.5-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
             "loc": "Edogawa-ku, Tokyo, Japan",
             "locJp": "江戸川区",
-            "tuneUrl": "http://21554.proxy.kiwisdr.com/?f=594am",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=594am",
             "distKm": 47
           },
           {
@@ -920,7 +973,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.nhk.jp/p/radirer/rs/88W859PYQ9/",
-    "twitter": "https://x.com/nhk_radirer"
+    "twitter": "https://x.com/nhk_radirer",
+    "radiko": "https://radiko.jp/r_seasons/36906"
   },
   {
     "group": "nogi",
@@ -949,10 +1003,10 @@ window.__SHOWS__ = [
             "distKm": 12
           },
           {
-            "name": "3.5-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
             "loc": "Edogawa-ku, Tokyo, Japan",
             "locJp": "江戸川区",
-            "tuneUrl": "http://21554.proxy.kiwisdr.com/?f=1134am",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1134am",
             "distKm": 19
           },
           {
@@ -980,7 +1034,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.joqr.co.jp/qr/program/nogizaka/",
-    "twitter": "https://x.com/nogi_joqr"
+    "twitter": "https://x.com/nogi_joqr",
+    "radiko": "https://radiko.jp/r_seasons/10002198"
   },
   {
     "group": "nogi",
@@ -1000,7 +1055,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": null,
-    "twitter": "https://x.com/fmfujichinmoku"
+    "twitter": "https://x.com/fmfujichinmoku",
+    "radiko": "https://radiko.jp/r_seasons/10001392"
   },
   {
     "group": "nogi",
@@ -1020,7 +1076,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": null,
-    "twitter": "https://x.com/BGO_fmfuji"
+    "twitter": "https://x.com/BGO_fmfuji",
+    "radiko": "https://radiko.jp/r_seasons/10001157"
   },
   {
     "group": "nogi",
@@ -1040,7 +1097,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.nhk.jp/p/hanaradi/rs/ZPN5WR61G3/",
-    "twitter": null
+    "twitter": null,
+    "radiko": null
   },
   {
     "group": "saku",
@@ -1069,10 +1127,10 @@ window.__SHOWS__ = [
             "distKm": 12
           },
           {
-            "name": "3.5-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
             "loc": "Edogawa-ku, Tokyo, Japan",
             "locJp": "江戸川区",
-            "tuneUrl": "http://21554.proxy.kiwisdr.com/?f=1134am",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1134am",
             "distKm": 19
           },
           {
@@ -1100,7 +1158,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.joqr.co.jp/qr/program/sakura/",
-    "twitter": "https://x.com/sakura_joqr"
+    "twitter": "https://x.com/sakura_joqr",
+    "radiko": "https://radiko.jp/r_seasons/10021155"
   },
   {
     "group": "saku",
@@ -1143,10 +1202,10 @@ window.__SHOWS__ = [
             "distKm": 27
           },
           {
-            "name": "3.5-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
             "loc": "Edogawa-ku, Tokyo, Japan",
             "locJp": "江戸川区",
-            "tuneUrl": "http://21554.proxy.kiwisdr.com/?f=1242am",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1242am",
             "distKm": 38
           },
           {
@@ -1160,7 +1219,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.allnightnippon.com/sakura/",
-    "twitter": "https://x.com/kochihoshi"
+    "twitter": "https://x.com/kochihoshi",
+    "radiko": "https://radiko.jp/r_seasons/10002455"
   },
   {
     "group": "hina",
@@ -1203,10 +1263,10 @@ window.__SHOWS__ = [
             "distKm": 27
           },
           {
-            "name": "3.5-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
             "loc": "Edogawa-ku, Tokyo, Japan",
             "locJp": "江戸川区",
-            "tuneUrl": "http://21554.proxy.kiwisdr.com/?f=1242am",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1242am",
             "distKm": 38
           },
           {
@@ -1220,7 +1280,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.allnightnippon.com/yoko/",
-    "twitter": "https://x.com/yoko_annX"
+    "twitter": "https://x.com/yoko_annX",
+    "radiko": "https://radiko.jp/r_seasons/51199"
   },
   {
     "group": "hina",
@@ -1240,7 +1301,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": null,
-    "twitter": "https://x.com/rio78MHz"
+    "twitter": "https://x.com/rio78MHz",
+    "radiko": "https://radiko.jp/r_seasons/10027663"
   },
   {
     "group": "hina",
@@ -1260,7 +1322,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.j-wave.co.jp/original/radionomics/",
-    "twitter": "https://x.com/radionomics813"
+    "twitter": "https://x.com/radionomics813",
+    "radiko": "https://radiko.jp/podcast/channels/9a5ccf27-7ac9-48b8-ba44-0feb01cd45c4"
   },
   {
     "group": "hina",
@@ -1280,7 +1343,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.fm-sanin.co.jp/program/hirahoradio",
-    "twitter": "https://x.com/hirahoradio"
+    "twitter": "https://x.com/hirahoradio",
+    "radiko": "https://radiko.jp/r_seasons/10024024"
   },
   {
     "group": "hina",
@@ -1300,7 +1364,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.j-wave.co.jp/original/questfuture/",
-    "twitter": "https://x.com/qff813_kosakana"
+    "twitter": "https://x.com/qff813_kosakana",
+    "radiko": "https://radiko.jp/r_seasons/10024034"
   },
   {
     "group": "hina",
@@ -1320,7 +1385,8 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.tfm.co.jp/hitoiki/",
-    "twitter": "https://x.com/hot_hitoiki46"
+    "twitter": "https://x.com/hot_hitoiki46",
+    "radiko": "https://radiko.jp/r_seasons/10019229"
   },
   {
     "group": "hina",
@@ -1349,10 +1415,10 @@ window.__SHOWS__ = [
             "distKm": 12
           },
           {
-            "name": "3.5-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
+            "name": "0-30 MHz SDR | Edogawa-ku, Tokyo, Japan",
             "loc": "Edogawa-ku, Tokyo, Japan",
             "locJp": "江戸川区",
-            "tuneUrl": "http://21554.proxy.kiwisdr.com/?f=1134am",
+            "tuneUrl": "http://ja7kbr.proxy.kiwisdr.com/?f=1134am",
             "distKm": 19
           },
           {
@@ -1380,10 +1446,11 @@ window.__SHOWS__ = [
       }
     ],
     "official": "https://www.joqr.co.jp/qr/program/hinatazaka/",
-    "twitter": "https://x.com/hinata_joqr"
+    "twitter": "https://x.com/hinata_joqr",
+    "radiko": "https://radiko.jp/r_seasons/10012174"
   }
 ];
-window.__BUILD_TIME__ = "2026-09-22 04:37 UTC";
+window.__BUILD_TIME__ = "2026-09-22 05:19 UTC";
 </script>
 <script>
 // =========================================================================
@@ -1408,6 +1475,18 @@ const HORIZON_MS = 7 * 86400000;
 let currentTz = 'Asia/Tokyo';
 let bandFilter = 'ALL';
 let groupFilter = 'ALL';
+
+// Remembered timezone / filters (per browser).
+const PREFS_KEY = 'sakamichi-radio-prefs';
+function loadPrefs() {
+  try { return JSON.parse(localStorage.getItem(PREFS_KEY)) || {}; } catch (e) { return {}; }
+}
+function savePrefs() {
+  try { localStorage.setItem(PREFS_KEY, JSON.stringify({ tz: currentTz, band: bandFilter, group: groupFilter })); } catch (e) {}
+}
+function setActive(selector, dataKey, value) {
+  document.querySelectorAll(selector).forEach(b => b.classList.toggle('active', b.dataset[dataKey] === value));
+}
 
 // Local timezone abbreviation (e.g. "EDT"); falls back to "Local".
 function localAbbr() {
@@ -1512,14 +1591,16 @@ function linksHtml(show) {
   const parts = [];
   if (show.official) parts.push(`<a class="lnk" href="${esc(show.official)}" target="_blank" rel="noopener" aria-label="Official site">${ICON_GLOBE}<span class="tip"><span class="tip-title">Official site</span></span></a>`);
   if (show.twitter) parts.push(`<a class="lnk" href="${esc(show.twitter)}" target="_blank" rel="noopener" aria-label="Twitter / X">${ICON_X}<span class="tip"><span class="tip-title">Twitter / X</span></span></a>`);
+  if (show.radiko) parts.push(`<a class="lnk radiko" href="${esc(show.radiko)}" target="_blank" rel="noopener" aria-label="radiko">radiko<span class="tip"><span class="tip-title">radiko</span><span class="tip-sub">Streams inside Japan only. Overseas you need a VPN with a Japanese endpoint.</span></span></a>`);
   return parts.join('');
 }
 function sdrButtonsHtml(show) {
   const st = show.stations[0];
   if (st.band === 'FM') {
+    const alt = show.radiko ? ' Use radiko instead (VPN outside Japan).' : '';
     return '<div class="sdr-none">'
       + '<span class="sdr-none-h">No KiwiSDR — FM</span>'
-      + '<span class="sdr-none-t">KiwiSDRs cover up to 30 MHz, which means they can\'t tune in to FM stations. If you find out this show broadcasts on an AM station, let me know and I will update the page.</span>'
+      + `<span class="sdr-none-t">KiwiSDRs stop at 30 MHz, so FM can't be tuned.${alt}</span>`
       + '</div>';
   }
   if (!(st.kiwis && st.kiwis.length)) return `<span class="sdr-na">no nearby SDR</span>`;
@@ -1557,6 +1638,8 @@ function cardEl(show, inst, nowMs) {
 
   const div = document.createElement('div');
   div.className = cls.join(' ');
+  div.dataset.start = inst.start;
+  div.dataset.end = inst.end;
   div.innerHTML = `
     <div class="card-head">
       <div class="card-headline">
@@ -1590,16 +1673,55 @@ let hoverKey = null;      // title_jp being hovered (temporary preview), or null
 let heroKeys = new Set(); // title_jp(s) currently shown in the Spotlight (drives block highlight)
 let ctxShows = [], ctxNow = null, ctxNowMs = 0;
 
-function render() {
+// Structural state: whatever decides which cards exist and how they're classed.
+// While it is unchanged, the 30s tick only refreshes countdown text instead of
+// rebuilding the DOM (which resets hovers and transitions mid-motion).
+let lastSig = '';
+function stateSig() {
+  const parts = [currentTz, bandFilter, groupFilter, partsInTz(ctxNow, currentTz).dateKey];
+  for (const show of ctxShows) {
+    const occ = occurrence(show, ctxNowMs);
+    parts.push(show.titleJp, occ.live ? occ.live.start : '-', occ.next ? occ.next.start : '-');
+  }
+  return parts.join('|');
+}
+function render(force) {
   ctxNow = new Date();
   ctxNowMs = ctxNow.getTime();
   ctxShows = SHOWS.filter(passesFilter);
+
+  const sig = stateSig();
+  if (!force && sig === lastSig) { refreshCountdowns(); return; }
+  lastSig = sig;
 
   renderHero();
   renderTimetable(ctxShows, ctxNow);
   updateBlockSelection();
   renderUpNext();
+  updateIcsLink();
   updateDocTitle();
+}
+
+// Cheap per-tick refresh: countdown labels, the now-line, the tab title.
+function refreshCountdowns() {
+  document.querySelectorAll('.card[data-start]').forEach(card => {
+    const start = Number(card.dataset.start), end = Number(card.dataset.end);
+    const live = ctxNowMs >= start && ctxNowMs < end;
+    const rel = card.querySelector('.card-rel');
+    if (rel) rel.textContent = live ? `● on air · ends ${fmtHM(new Date(end), currentTz)}` : relTime(start - ctxNowMs);
+  });
+  const nl = document.querySelector('#timetable .tt-now');
+  if (nl) {
+    const t = partsInTz(ctxNow, currentTz);
+    nl.style.top = `${TT_PAD + (t.h * 60 + t.m) / 60 * HOUR_PX}px`;
+  }
+  updateDocTitle();
+}
+
+// The calendar button follows the group filter.
+function updateIcsLink() {
+  const a = document.getElementById('icsLink');
+  if (a) a.href = groupFilter === 'ALL' ? 'radio.ics' : `radio-${groupFilter}.ics`;
 }
 
 // Live browser-tab title: "🔴 LIVE" when a show is on, else a countdown to the next.
@@ -1627,7 +1749,7 @@ function renderUpNext() {
   }
   items.sort((a, b) => a.inst.start - b.inst.start);
   root.innerHTML = '';
-  count.textContent = items.length ? `${items.length} shows` : '';
+  count.textContent = items.length ? `${items.length} show${items.length === 1 ? '' : 's'}` : '';
   if (!items.length) {
     root.innerHTML = `<div class="empty-msg">No upcoming shows in the next 7 days for this filter.</div>`;
     return;
@@ -1684,6 +1806,9 @@ function renderHero() {
 
   card.innerHTML = '';
   heroKeys = new Set(items.map(it => it.show.titleJp));
+  const anyLive = items.some(it => ctxNowMs >= it.inst.start && ctxNowMs < it.inst.end);
+  document.getElementById('heroLabelText').textContent = anyLive ? 'On air now' : 'Spotlight';
+  document.getElementById('heroLabel').classList.toggle('on-air', anyLive);
   if (!items.length) {
     card.innerHTML = `<div class="empty-msg">No shows for this filter.</div>`;
     return;
@@ -1712,6 +1837,7 @@ function updateBlockSelection() {
 
 // ---- week timetable ----
 const HOUR_PX = 16;   // fixed 24h grid kept within the existing height
+const TT_PAD = 11;    // buffer so the top/bottom hour labels aren't clipped
 
 function fmtMin(min) {
   if (min >= 1440) return '24:00';
@@ -1720,9 +1846,12 @@ function fmtMin(min) {
 }
 
 // Day-of-week segments for a show in the displayed tz; splits midnight crossings.
-function segmentsInTz(show, tz) {
+function segmentsInTz(show, tz, nowMs) {
   const startMin0 = parseTime(show.startJst);
-  const baseStart = REF_SUNDAY_JST + show.dayJst * 86400000 + startMin0 * 60000;
+  const refStart = REF_SUNDAY_JST + show.dayJst * 86400000 + startMin0 * 60000;
+  // Anchor to the occurrence nearest `now`, not the reference week: a DST zone's
+  // offset in the reference week (late May) differs from its offset in winter.
+  const baseStart = refStart + Math.round((nowMs - refStart) / WEEK_MS) * WEEK_MS;
   const baseEnd = baseStart + (parseTime(show.endJst) - startMin0) * 60000;
   const s = partsInTz(new Date(baseStart), tz);
   const e = partsInTz(new Date(baseEnd), tz);
@@ -1765,7 +1894,7 @@ function renderTimetable(shows, now) {
 
   const perDay = Array.from({ length: 7 }, () => []);
   for (const show of shows) {
-    for (const seg of segmentsInTz(show, currentTz)) {
+    for (const seg of segmentsInTz(show, currentTz, now.getTime())) {
       if (seg.end <= seg.start) continue;
       perDay[seg.day].push({ ...seg, show });
     }
@@ -1773,7 +1902,7 @@ function renderTimetable(shows, now) {
 
   // always a full 00:00–24:00 day
   const startHour = 0, endHour = 24;
-  const PAD = 11;  // buffer so the top/bottom hour labels aren't clipped
+  const PAD = TT_PAD;
   const bodyH = 24 * HOUR_PX + PAD * 2;
   const y = min => PAD + min / 60 * HOUR_PX;
   grid.style.gridTemplateColumns = '46px repeat(7, 1fr)';
@@ -1788,7 +1917,7 @@ function renderTimetable(shows, now) {
   for (let d = 0; d < 7; d++) {
     const h = document.createElement('div');
     h.className = 'tt-dayhead' + (d === today.dayIdx ? ' today' : '');
-    h.textContent = dayNamesLong[d];
+    h.innerHTML = `<span class="d-long">${dayNamesLong[d]}</span><span class="d-short">${dayNames[d]}</span>`;
     grid.appendChild(h);
   }
 
@@ -1854,14 +1983,22 @@ window.addEventListener('DOMContentLoaded', () => {
   document.querySelector('#tzSelect option[value="LOCAL"]').textContent = `${localAbbr()} Local`;
   document.querySelector('#tzSelect option[value="LOCAL"]').title = localTz;
 
-  document.getElementById('tzSelect').addEventListener('change', e => { currentTz = e.target.value; render(); });
+  // Remembered choices; a first visit from outside Japan starts in local time.
+  const prefs = loadPrefs();
+  if (['Asia/Tokyo', 'UTC', 'LOCAL'].includes(prefs.tz)) currentTz = prefs.tz;
+  else currentTz = localTz === 'Asia/Tokyo' ? 'Asia/Tokyo' : 'LOCAL';
+  if (['ALL', 'AM', 'FM'].includes(prefs.band)) bandFilter = prefs.band;
+  if (['ALL', 'nogi', 'saku', 'hina'].includes(prefs.group)) groupFilter = prefs.group;
+  document.getElementById('tzSelect').value = currentTz;
+  setActive('#bandFilter button', 'filter', bandFilter);
+  setActive('#groupFilter button', 'group', groupFilter);
+
+  document.getElementById('tzSelect').addEventListener('change', e => { currentTz = e.target.value; savePrefs(); render(true); });
   document.querySelectorAll('#bandFilter button').forEach(btn => btn.addEventListener('click', () => {
-    document.querySelectorAll('#bandFilter button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active'); bandFilter = btn.dataset.filter; render();
+    bandFilter = btn.dataset.filter; setActive('#bandFilter button', 'filter', bandFilter); savePrefs(); render(true);
   }));
   document.querySelectorAll('#groupFilter button').forEach(btn => btn.addEventListener('click', () => {
-    document.querySelectorAll('#groupFilter button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active'); groupFilter = btn.dataset.group; render();
+    groupFilter = btn.dataset.group; setActive('#groupFilter button', 'group', groupFilter); savePrefs(); render(true);
   }));
   if (BUILD_TIME) document.getElementById('buildStamp').textContent = `Built ${BUILD_TIME}`;
 
@@ -1874,13 +2011,18 @@ window.addEventListener('DOMContentLoaded', () => {
   tt.addEventListener('mouseleave', () => setHover(null));
   tt.addEventListener('click', e => {
     const blk = e.target.closest('.tt-block');
-    if (blk && blk.dataset.key) pinShow(blk.dataset.key);
+    if (!(blk && blk.dataset.key)) return;
+    pinShow(blk.dataset.key);
+    // single-column layouts: the Spotlight sits above the timetable, so bring it into view
+    if (window.matchMedia('(max-width: 980px)').matches) {
+      document.querySelector('.hero-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   });
 
   updateClock();
-  render();
-  setInterval(updateClock, 1000);   // ticking JST clock
-  setInterval(render, 30000);       // refresh now/next every 30s
+  render(true);
+  setInterval(updateClock, 1000);       // ticking JST clock
+  setInterval(() => render(), 30000);   // countdowns every 30s; full rebuild only when something changed
 });
 
 </script>
