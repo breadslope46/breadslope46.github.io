@@ -1,0 +1,45 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//breadslope46//Sakamichi RADIO//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:坂道RADIO · Sakurazaka46
+X-WR-TIMEZONE:Asia/Tokyo
+BEGIN:VTIMEZONE
+TZID:Asia/Tokyo
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0900
+TZOFFSETTO:+0900
+TZNAME:JST
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:3759592be688f4c2@breadslope46.github.io
+DTSTAMP:20260922T051929Z
+DTSTART;TZID=Asia/Tokyo:20260524T190000
+DTEND;TZID=Asia/Tokyo:20260524T193000
+RRULE:FREQ=WEEKLY;BYDAY=SU
+SUMMARY:櫻坂46の「さ」
+DESCRIPTION:Sakurazaka no "Sa"\nHosts: Mukai Itoha\nBunka Hōsō (JOQR) 113
+ 4 kHz\nOfficial: https://www.joqr.co.jp/qr/program/sakura/\nradiko: https:
+ //radiko.jp/r_seasons/10021155
+LOCATION:Bunka Hōsō 1134 kHz
+CATEGORIES:Sakurazaka46
+URL:https://www.joqr.co.jp/qr/program/sakura/
+END:VEVENT
+BEGIN:VEVENT
+UID:392a5a81b5358d00@breadslope46.github.io
+DTSTAMP:20260922T051929Z
+DTSTART;TZID=Asia/Tokyo:20260524T230000
+DTEND;TZID=Asia/Tokyo:20260524T233000
+RRULE:FREQ=WEEKLY;BYDAY=SU
+SUMMARY:櫻坂46こちら有楽町星空放送局
+DESCRIPTION:Kochira Yurakuchō Hoshizora Hōsōkyoku\nHosts: Kojima Nagisa\
+ nNippon Hōsō (JOLF) 1242 kHz\nOfficial: https://www.allnightnippon.com/s
+ akura/\nradiko: https://radiko.jp/r_seasons/10002455
+LOCATION:Nippon Hōsō 1242 kHz
+CATEGORIES:Sakurazaka46
+URL:https://www.allnightnippon.com/sakura/
+END:VEVENT
+END:VCALENDAR
